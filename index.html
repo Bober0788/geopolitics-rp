@@ -11,32 +11,36 @@
         .container { max-width: 1000px; margin: 0 auto; }
         .card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         .form-group { margin-bottom: 15px; }
-        input, select { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
         .btn { background: var(--accent); color: #0f172a; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn:hover { opacity: 0.9; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; }
-        .stat-box { background: #0f172a; padding: 15px; border-radius: 8px; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 15px; }
+        .stat-box { background: #0f172a; padding: 12px; border-radius: 8px; text-align: center; }
         
-        /* КНОПКИ КАТЕГОРІЙ */
-        .category-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .cat-btn { background: #0f172a; border: 1px solid #334155; color: var(--text); padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .cat-btn.active, .cat-btn:hover { background: var(--accent); color: #0f172a; }
+        .main-nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-btn { flex: 1; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; text-align: center; }
+        .nav-btn.active { background: var(--accent); color: #0f172a; }
 
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .category-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .cat-btn { background: #0f172a; border: 1px solid #334155; color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .cat-btn.active { background: var(--accent); color: #0f172a; }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
         .item-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
         .hidden { display: none; }
-        .effects-list { font-size: 0.9em; color: #94a3b8; margin: 8px 0; }
+        .chat-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
+        .msg { border-bottom: 1px solid #334155; padding: 8px 0; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1 style="text-align: center; color: var(--accent);">🌍 GLOBAL GEOPOLITICS RP</h1>
+    <h1 style="text-align: center; color: var(--accent);">🌍 GLOBAL GEOPOLITICS RP 2026</h1>
 
-    <!-- ФОРМА ВХОДУ ТА РЕЄСТРАЦІЇ -->
+    <!-- ВХІД / РЕЄСТРАЦІЯ -->
     <div id="authSection" class="card">
-        <h2>🔑 Вхід / Реєстрація Держави</h2>
+        <h2>🔑 Вхід / Вибір Держави</h2>
         <div class="form-group">
             <label>Нікнейм Правителя / Логін:</label>
             <input type="text" id="usernameInput" placeholder="Наприклад: King_Bober">
@@ -46,47 +50,95 @@
             <input type="password" id="passwordInput" placeholder="******">
         </div>
         <div class="form-group">
-            <label>Назва Країни (для нових гравців):</label>
-            <input type="text" id="countryInput" placeholder="Наприклад: Імперія Панама">
+            <label>Оберіть Наявну Державу (для нових гравців):</label>
+            <select id="countrySelect">
+                <option value="">Завантаження списку країн...</option>
+            </select>
         </div>
-        <button class="btn" onclick="loginOrRegister()">Увійти / Зареєструвати країну</button>
+        <button class="btn" onclick="loginOrRegister()">Увійти / Отримати контроль над державою</button>
     </div>
 
-    <!-- КАБІНЕТ ГРАВЦЯ -->
+    <!-- ОСНОВНИЙ ІНТЕРФЕЙС -->
     <div id="gameSection" class="hidden">
-        <div class="card">
+        
+        <!-- НАВІГАЦІЯ -->
+        <div class="main-nav">
+            <div class="nav-btn active" onclick="showTab('dashboard', this)">📊 Статистика</div>
+            <div class="nav-btn" onclick="showTab('build', this)">🏗 Будівництво (НПЗ/Шахти)</div>
+            <div class="nav-btn" onclick="showTab('market', this)">💰 Ринок / Продаж</div>
+            <div class="nav-btn" onclick="showTab('diplomacy', this)">🤝 Зв'язок / Дипломатія</div>
+        </div>
+
+        <!-- ВКЛАДКА 1: СТАТИСТИКА -->
+        <div id="tabDashboard" class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 id="countryTitle">Держава</h2>
+                <h2>Держава: <span id="countryTitle" style="color: var(--accent);"></span></h2>
                 <button class="btn btn-danger" style="width: auto;" onclick="logout()">Вийти</button>
             </div>
             <p>Правитель: <b id="rulerName" style="color: var(--accent);"></b></p>
 
+            <h3>📈 Повна Статистика Держави:</h3>
             <div class="stats-grid">
-                <div class="stat-box">Бюджет<br><b id="statBudget" style="font-size: 1.3em; color: var(--success);">0</b> млн $</div>
-                <div class="stat-box">Дохід/день<br><b id="statIncome" style="font-size: 1.3em;">+0</b> млн $</div>
-                <div class="stat-box">Енергобаланс<br><b id="statEnergy" style="font-size: 1.3em;">0%</b></div>
-                <div class="stat-box">Щастя<br><b id="statHappiness" style="font-size: 1.3em;">50%</b></div>
+                <div class="stat-box">Бюджет<br><b id="statBudget" style="font-size: 1.2em; color: var(--success);">0</b> млн $</div>
+                <div class="stat-box">Дохід/день<br><b id="statIncome" style="font-size: 1.2em;">+0</b> млн $</div>
+                <div class="stat-box">🛢 Нафта<br><b id="statOil" style="font-size: 1.2em;">0</b> бар.</div>
+                <div class="stat-box">⛏ Руда/Ресурси<br><b id="statOre" style="font-size: 1.2em;">0</b> т.</div>
+                <div class="stat-box">Енергобаланс<br><b id="statEnergy">0%</b></div>
+                <div class="stat-box">Щастя Населення<br><b id="statHappiness">50%</b></div>
             </div>
 
-            <h4 style="margin-top:20px;">🏛 Збудовані об'єкти:</h4>
+            <h4 style="margin-top:20px;">🏛 Побудовані Об'єкти:</h4>
             <p id="buildingsList">Завантаження...</p>
         </div>
 
-        <!-- МАГАЗИН БУДІВНИЦТВА С КАТЕГОРІЯМИ -->
-        <div class="card">
-            <h3>🏗️ Повний Реєстр Державних та Корпоративних Об'єктів</h3>
-            
+        <!-- ВКЛАДКА 2: БУДІВНИЦТВО -->
+        <div id="tabBuild" class="card hidden">
+            <h3>🏗 Будівництво та Видобуток</h3>
             <div class="category-bar">
-                <button class="cat-btn active" onclick="switchCategory('energy', this)">⚡️ Енергетика</button>
+                <button class="cat-btn active" onclick="switchCategory('extract', this)">⛏ Видобуток (НПЗ/Шахти)</button>
+                <button class="cat-btn" onclick="switchCategory('energy', this)">⚡️ Енергетика</button>
                 <button class="cat-btn" onclick="switchCategory('gov', this)">🏢 Управління</button>
                 <button class="cat-btn" onclick="switchCategory('logistics', this)">📦 Логістика</button>
-                <button class="cat-btn" onclick="switchCategory('tech', this)">📡 Зв'язок</button>
-                <button class="cat-btn" onclick="switchCategory('fuel', this)">⛽️ Паливо</button>
-                <button class="cat-btn" onclick="switchCategory('prod', this)">🚜 Виробництво</button>
             </div>
-
             <div class="shop-grid" id="shopGrid"></div>
         </div>
+
+        <!-- ВКЛАДКА 3: РИНОК ТА ПРОДАЖ -->
+        <div id="tabMarket" class="card hidden">
+            <h3>💰 ДЕРЖАВНИЙ РИНОК / ПРОДАЖ</h3>
+            
+            <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>Виставити ресурс на продаж:</h4>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <select id="sellType" style="flex:1;">
+                        <option value="oil">🛢 Нафта</option>
+                        <option value="ore">⛏ Руда</option>
+                    </select>
+                    <input type="number" id="sellAmount" placeholder="Кількість" style="flex:1;">
+                    <input type="number" id="sellPrice" placeholder="Ціна за одиницю ($)" style="flex:1;">
+                    <button class="btn btn-success" style="flex:1;" onclick="createOffer()">Продати</button>
+                </div>
+            </div>
+
+            <h4>Активні лоти інших держав:</h4>
+            <div id="marketList">Завантаження лотів...</div>
+        </div>
+
+        <!-- ВКЛАДКА 4: ДИПЛОМАТІЯ -->
+        <div id="tabDiplomacy" class="card hidden">
+            <h3>🤝 Дипломатичний Зв'язок</h3>
+            <div class="chat-box" id="chatBox">Завантаження повідомлень...</div>
+            
+            <div class="form-group">
+                <label>Отримувач (Держава):</label>
+                <select id="msgReceiver"></select>
+            </div>
+            <div class="form-group">
+                <textarea id="msgText" rows="3" placeholder="Введіть ноту/повідомлення..."></textarea>
+            </div>
+            <button class="btn" onclick="sendMessage()">Надіслати дип-ноту</button>
+        </div>
+
     </div>
 </div>
 
@@ -96,66 +148,68 @@
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentPlayer = null;
-    let currentCategory = 'energy';
+    let currentCategory = 'extract';
 
     const buildingCatalog = [
-        // ЕЛЕКТРОЕНЕРГІЯ
-        { cat: 'energy', name: "⚡️ АЕС", cost: 764, income: 0, energy: 25, hap: -10, desc: "+25% Ел-енергії, -10% Щастя" },
-        { cat: 'energy', name: "💧 ГЕС", cost: 392, income: 0, energy: 15, hap: 0, desc: "+15% Ел-енергії" },
-        { cat: 'energy', name: "🔥 ТЕС", cost: 274, income: 0, energy: 18, hap: -5, desc: "+18% Ел-енергії" },
-        { cat: 'energy', name: "🌬️ ВЕС", cost: 106, income: 0, energy: 8, hap: 2, desc: "+8% Ел-енергії, +2% Щастя" },
-        { cat: 'energy', name: "🔌 ЛЕП (Лінії передач)", cost: 204, income: 10, energy: 5, hap: 0, desc: "Пропускна здатність та стабільність мережі" },
+        // ВИДОБУТОК ТА ПРОМИСЛОВІСТЬ (НПЗ, ШАХТИ)
+        { cat: 'extract', name: "🛢 Нафтопереробний завод (НПЗ)", cost: 650, income: 80, oil: 50, ore: 0, energy: -20, desc: "Дає +50 нафти/день та +80 млн $ доходу" },
+        { cat: 'extract', name: "⛏ Вугільна/Залізна Шахта", cost: 400, income: 45, oil: 0, ore: 60, energy: -15, desc: "Дає +60 руди/день" },
+        { cat: 'extract', name: "🏗 Нафтова вишка", cost: 500, income: 60, oil: 40, ore: 0, energy: -10, desc: "+40 нафти/день" },
 
-        // УПРАВЛІННЯ ТА БЕЗПЕКА
-        { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, income: 0, energy: -20, hap: 5, desc: "Дає легітимність країні та видачу законів" },
-        { cat: 'gov', name: "🛂 Митний термінал", cost: 600, income: 50, energy: 0, hap: 0, desc: "Дозволяє торгувати ресурсами з іншими країнами" },
-        { cat: 'gov', name: "🚔 Поліцейський департамент", cost: 180, income: 0, energy: -5, hap: 10, desc: "Захист від бунтів та заколотів" },
-        { cat: 'gov', name: "🕵️ Штаб Розвідки", cost: 500, income: 0, energy: -10, hap: 0, desc: "Шпигунство та диверсії" },
+        // ЕНЕРГЕТИКА
+        { cat: 'energy', name: "⚡️ АЕС", cost: 764, income: 0, oil: 0, ore: 0, energy: 25, desc: "+25% Ел-енергії" },
+        { cat: 'energy', name: "💧 ГЕС", cost: 392, income: 0, oil: 0, ore: 0, energy: 15, desc: "+15% Ел-енергії" },
+        { cat: 'energy', name: "🔥 ТЕС", cost: 274, income: 0, oil: -10, ore: 0, energy: 18, desc: "+18% Ел-енергії (споживає нафту)" },
 
-        // ЛОГІСТИКА ТА ПОШТА
-        { cat: 'logistics', name: "🏭 Логістичний хаб (Склад)", cost: 420, income: 20, energy: -10, hap: 0, desc: "+30% до ліміту доставок матеріалів" },
-        { cat: 'logistics', name: "📦 Поштова мережа", cost: 180, income: 25, energy: -5, hap: 5, desc: "+15% дохід пошти, +5% Щастя" },
-        { cat: 'logistics', name: "🚛 Автопарк (Депо)", cost: 280, income: 15, energy: -5, hap: 0, desc: "Зменшує витрати палива транспортом" },
-        { cat: 'logistics', name: "🛳 Морський порт", cost: 800, income: 100, energy: -20, hap: 0, desc: "+100% ліміт міжнародної торгівлі" },
+        // УПРАВЛІННЯ
+        { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, income: 0, oil: 0, ore: 0, energy: -20, desc: "Центр управління державою" },
+        { cat: 'gov', name: "🛂 Митний термінал", cost: 600, income: 50, oil: 0, ore: 0, energy: 0, desc: "+50 млн $ від торгівлі" },
 
-        // ЗВ'ЯЗОК ТА ТЕХНОЛОГІЇ
-        { cat: 'tech', name: "🗼 Вишка 3G", cost: 150, income: 10, energy: -5, hap: 2, desc: "Базовий зв'язок та пошта" },
-        { cat: 'tech', name: "📡 Вишка 4G", cost: 300, income: 25, energy: -10, hap: 5, desc: "Потрібна для онлайн-банкінгу" },
-        { cat: 'tech', name: "⚡️ Вишка 5G", cost: 650, income: 60, energy: -15, hap: 10, desc: "+25% до прибутку IT-сектору" },
-        { cat: 'tech', name: "🖥 Серверний Центр", cost: 520, income: 50, energy: -25, hap: 0, desc: "Необхідний для IT-компаній та дата-центрів" },
-
-        // ЕНЕРГО-ПАЛИВНИЙ СЕКТОР
-        { cat: 'fuel', name: "⛽️ Мережа АЗС", cost: 450, income: 45, energy: -5, hap: 0, desc: "Забезпечує паливом цивільний транспорт" },
-        { cat: 'fuel', name: "🔌 Зарядні станції (Electro)", cost: 380, income: 35, energy: -15, hap: 5, desc: "Живлення електранспорту та 5G систем" },
-
-        // ВИРОБНИЦТВО ТА СІЛЬСЬКЕ ГОСПОДАРСТВО
-        { cat: 'prod', name: "🏭 Завод", cost: 48, income: 15, energy: -5, hap: -2, desc: "+15% виробництва товарів" },
-        { cat: 'prod', name: "🌾 Агрокомплекс", cost: 96, income: 20, energy: -15, hap: 5, desc: "+25% вирощування ресурсів" },
-        { cat: 'prod', name: "🚜 Ферма", cost: 180, income: 40, energy: -25, hap: 5, desc: "+40% агро-ресурсів" }
+        // ЛОГІСТИКА
+        { cat: 'logistics', name: "🛳 Морський порт", cost: 800, income: 100, oil: 0, ore: 0, energy: -20, desc: "+100 млн $ міжнародної торгівлі" }
     ];
+
+    window.onload = async () => {
+        loadCountriesList();
+    };
+
+    async function loadCountriesList() {
+        const { data } = await db.from('real_countries').select('*');
+        const select = document.getElementById('countrySelect');
+        const msgSelect = document.getElementById('msgReceiver');
+        select.innerHTML = '';
+        msgSelect.innerHTML = '';
+
+        if(data) {
+            data.forEach(c => {
+                select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                msgSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+            });
+        }
+    }
 
     async function loginOrRegister() {
         const user = document.getElementById('usernameInput').value.trim();
         const pass = document.getElementById('passwordInput').value.trim();
-        const country = document.getElementById('countryInput').value.trim();
+        const country = document.getElementById('countrySelect').value;
 
         if(!user || !pass) return alert('Заповніть логін та пароль!');
 
-        let { data, error } = await db.from('players').select('*').eq('username', user).single();
+        let { data } = await db.from('players').select('*').eq('username', user).single();
 
         if(data) {
             if(data.password !== pass) return alert('Невірний пароль!');
             currentPlayer = data;
         } else {
-            if(!country) return alert('Введіть назву країни для реєстрації!');
-            let { data: newPlayer, error: createError } = await db.from('players').insert([{
+            let { data: newPlayer, error } = await db.from('players').insert([{
                 username: user,
                 password: pass,
                 country_name: country,
+                real_country: country,
                 buildings: ["🏛 Урядовий квартал"]
             }]).select().single();
 
-            if(createError) return alert('Помилка реєстрації: ' + createError.message);
+            if(error) return alert('Помилка: Країна вже зайнята або помилка баз даних.');
             currentPlayer = newPlayer;
         }
 
@@ -170,12 +224,31 @@
         document.getElementById('rulerName').innerText = currentPlayer.username;
         document.getElementById('statBudget').innerText = currentPlayer.budget;
         document.getElementById('statIncome').innerText = '+' + currentPlayer.income;
+        document.getElementById('statOil').innerText = currentPlayer.oil || 0;
+        document.getElementById('statOre').innerText = currentPlayer.ore || 0;
         document.getElementById('statEnergy').innerText = currentPlayer.energy + '%';
         document.getElementById('statHappiness').innerText = currentPlayer.happiness + '%';
         
         document.getElementById('buildingsList').innerText = currentPlayer.buildings ? currentPlayer.buildings.join(', ') : 'Немає';
 
         renderShop();
+        loadMarket();
+        loadMessages();
+    }
+
+    function showTab(tabName, btn) {
+        document.querySelectorAll('.main-nav .nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.getElementById('tabDashboard').classList.add('hidden');
+        document.getElementById('tabBuild').classList.add('hidden');
+        document.getElementById('tabMarket').classList.add('hidden');
+        document.getElementById('tabDiplomacy').classList.add('hidden');
+
+        if(tabName === 'dashboard') document.getElementById('tabDashboard').classList.remove('hidden');
+        if(tabName === 'build') document.getElementById('tabBuild').classList.remove('hidden');
+        if(tabName === 'market') { document.getElementById('tabMarket').classList.remove('hidden'); loadMarket(); }
+        if(tabName === 'diplomacy') { document.getElementById('tabDiplomacy').classList.remove('hidden'); loadMessages(); }
     }
 
     function switchCategory(cat, btn) {
@@ -188,54 +261,152 @@
     function renderShop() {
         const grid = document.getElementById('shopGrid');
         grid.innerHTML = '';
-        
         const filtered = buildingCatalog.filter(b => b.cat === currentCategory);
 
         filtered.forEach(b => {
             grid.innerHTML += `
                 <div class="item-card">
                     <div>
-                        <b style="font-size:1.1em;">${b.name}</b><br>
+                        <b>${b.name}</b><br>
                         Ціна: <b style="color:var(--accent);">${b.cost} млн $</b><br>
-                        <div class="effects-list">
-                            Дохід: +${b.income} млн/день<br>
-                            Енергія: ${b.energy}%<br>
-                            Опис: ${b.desc}
-                        </div>
+                        <small>${b.desc}</small>
                     </div>
-                    <button class="btn btn-success" style="margin-top:10px;" onclick="buyBuilding('${b.name}', ${b.cost}, ${b.income}, ${b.energy}, ${b.hap})">Збудувати</button>
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="buyBuilding('${b.name}', ${b.cost}, ${b.income}, ${b.energy}, ${b.oil}, ${b.ore})">Збудувати</button>
                 </div>
             `;
         });
     }
 
-    async function buyBuilding(name, cost, income, energy, hap) {
-        if(currentPlayer.budget < cost) return alert('Нестача коштів у бюджеті!');
+    async function buyBuilding(name, cost, income, energy, oil, ore) {
+        if(currentPlayer.budget < cost) return alert('Нестача бюджету!');
 
         currentPlayer.budget -= cost;
         currentPlayer.income += income;
         currentPlayer.energy += energy;
-        currentPlayer.happiness += hap;
+        currentPlayer.oil = (currentPlayer.oil || 0) + oil;
+        currentPlayer.ore = (currentPlayer.ore || 0) + ore;
         if(!currentPlayer.buildings) currentPlayer.buildings = [];
         currentPlayer.buildings.push(name);
 
-        const { error } = await db.from('players').update({
+        await db.from('players').update({
             budget: currentPlayer.budget,
             income: currentPlayer.income,
             energy: currentPlayer.energy,
-            happiness: currentPlayer.happiness,
+            oil: currentPlayer.oil,
+            ore: currentPlayer.ore,
             buildings: currentPlayer.buildings
         }).eq('id', currentPlayer.id);
 
-        if(error) return alert('Помилка збереження: ' + error.message);
-
-        alert(`Об'єкт ${name} успішно збудовано!`);
+        alert(`Збудовано: ${name}`);
         loadGameUI();
     }
 
-    function logout() {
-        location.reload();
+    // 💰 РИНОК
+    async function createOffer() {
+        const type = document.getElementById('sellType').value;
+        const amount = parseInt(document.getElementById('sellAmount').value);
+        const price = parseInt(document.getElementById('sellPrice').value);
+
+        if(!amount || !price || amount <= 0 || price <= 0) return alert('Введіть коректні дані!');
+        if(type === 'oil' && (currentPlayer.oil || 0) < amount) return alert('Нестача нафти!');
+        if(type === 'ore' && (currentPlayer.ore || 0) < amount) return alert('Нестача руди!');
+
+        if(type === 'oil') currentPlayer.oil -= amount;
+        if(type === 'ore') currentPlayer.ore -= amount;
+
+        await db.from('players').update({ oil: currentPlayer.oil, ore: currentPlayer.ore }).eq('id', currentPlayer.id);
+        
+        await db.from('market_offers').insert([{
+            seller_id: currentPlayer.id,
+            seller_name: currentPlayer.country_name,
+            item_type: type,
+            amount: amount,
+            price_per_unit: price
+        }]);
+
+        alert('Лот виставлено на ринок!');
+        loadGameUI();
     }
+
+    async function loadMarket() {
+        const { data } = await db.from('market_offers').select('*');
+        const list = document.getElementById('marketList');
+        list.innerHTML = '';
+
+        if(!data || data.length === 0) { list.innerHTML = 'На ринку немає активних лотів.'; return; }
+
+        data.forEach(o => {
+            const total = o.amount * o.price_per_unit;
+            list.innerHTML += `
+                <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b>${o.seller_name}</b> продає ${o.amount} од. (${o.item_type === 'oil' ? '🛢 Нафта' : '⛏ Руда'}) за <b>${total} млн $</b> (${o.price_per_unit} млн $/од)
+                    </div>
+                    ${o.seller_id !== currentPlayer.id ? `<button class="btn btn-success" style="width:auto;" onclick="buyOffer('${o.id}', '${o.seller_id}', '${o.item_type}', ${o.amount}, ${total})">Купити</button>` : '<small>Ваш лот</small>'}
+                </div>
+            `;
+        });
+    }
+
+    async function buyOffer(offerId, sellerId, type, amount, totalCost) {
+        if(currentPlayer.budget < totalCost) return alert('Нестача коштів у бюджеті!');
+
+        currentPlayer.budget -= totalCost;
+        if(type === 'oil') currentPlayer.oil = (currentPlayer.oil || 0) + amount;
+        if(type === 'ore') currentPlayer.ore = (currentPlayer.ore || 0) + amount;
+
+        // Оновлюємо покупця
+        await db.from('players').update({ budget: currentPlayer.budget, oil: currentPlayer.oil, ore: currentPlayer.ore }).eq('id', currentPlayer.id);
+
+        // Оновлюємо продавця (додаємо йому гроші)
+        const { data: seller } = await db.from('players').select('*').eq('id', sellerId).single();
+        if(seller) {
+            await db.from('players').update({ budget: seller.budget + totalCost }).eq('id', sellerId);
+        }
+
+        // Видаляємо лот з ринку
+        await db.from('market_offers').delete().eq('id', offerId);
+
+        alert('Успішна покупка!');
+        loadGameUI();
+    }
+
+    // 🤝 ДИПЛОМАТІЯ
+    async function sendMessage() {
+        const receiver = document.getElementById('msgReceiver').value;
+        const text = document.getElementById('msgText').value.trim();
+
+        if(!text) return alert('Введіть текст ноти!');
+
+        await db.from('messages').insert([{
+            sender_name: currentPlayer.country_name,
+            receiver_country: receiver,
+            text: text
+        }]);
+
+        document.getElementById('msgText').value = '';
+        alert('Дипломатична нота надіслана!');
+        loadMessages();
+    }
+
+    async function loadMessages() {
+        const { data } = await db.from('messages').select('*').or(`sender_name.eq.${currentPlayer.country_name},receiver_country.eq.${currentPlayer.country_name}`).order('created_at', {ascending: false});
+        const box = document.getElementById('chatBox');
+        box.innerHTML = '';
+
+        if(!data || data.length === 0) { box.innerHTML = 'Дипломатичних листувань немає.'; return; }
+
+        data.forEach(m => {
+            box.innerHTML += `
+                <div class="msg">
+                    <small style="color:var(--accent);">${m.sender_name} ➔ ${m.receiver_country}:</small><br>
+                    ${m.text}
+                </div>
+            `;
+        });
+    }
+
+    function logout() { location.reload(); }
 </script>
 </body>
 </html>
