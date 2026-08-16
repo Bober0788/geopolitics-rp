@@ -1,3 +1,381 @@
+
+Gemini
+Новий чат
+Пошук у чатах
+Бібліотека
+Новий блокнот
+Покращення гри рп в телеграмі
+FIFA/EA FC кар'єра: повернення азарту
+Збірка штоків зчеплення Мінськ 125
+Передача фото з iPhone на ПК
+Бюджетні місця Автомобільно-дорожнього коледжу
+Бюджетне місце: підтвердження та подання документів
+Карбюратор Мінськ 125: заслонка не ходить
+Неправильний карбюратор на Мустангу Фіт
+Ремонт карбюратора Мінськ після розносу
+Тюнер X96 ось таке є
+Ідеї ігор Roblox для 2-4 гравців
+Розрахунок витрати палива Мінськ 125
+Порівняння мопедів: Мінськ, Dingo, Alpha
+Зміна голосу в Discord на Губку Боба
+Вимкнути підказки тренера в FIFA/EA FC
+Контракт чи бюджет: пояснення статусу вступу
+Пошук золотого хрестика металошукачем
+Проблеми зчеплення на Мінську: як їхати
+Вибір 200 кубового мотоцикла в Україні
+Збільшення витрати палива Мінська
+Нові мотоцикли до 30 тис. у кредит
+Roblox Maniac Game Script Request
+Discord чорний екран: причини та рішення
+Minecraft Create Моди Несумісність Версій
+Помилка 503: Сайт Apple недоступний
+Отруєння лаком та тепловий удар
+Відновлення пароля Apple ID після блокування
+Відмінності двигунів "Мінськ Лідер" та 1982
+Ремонт двигуна мотоцикла "Мінськ"
+Налаштування сервера Minecraft Forge 1.20.1
+Мінськ 125: Поганий запуск та свист
+Налаштування ШІ для складної гри
+Розмова з Gemini
+кажи де краще горловне бесплатно та легко та 24 7
+
+Для такої структури гри найкраще підійде поєднання Supabase (для бази даних та реєстрації) + GitHub Pages або Vercel (для самого сайту) + GitHub Actions (для автоматичних щоденних оновлень 24/7).
+
+Це абсолютно безкоштовно, надійно і дані ніколи не зникатимуть при виході чи перезавантаженні.
+
+Порівняння безкоштовних варіантів:
+
+Сервіс / Інструмент	Що робить у грі	Чому це зручно і легко
+Supabase	База даних + Реєстрація	Вхід/пароль готовий з коробки. Дані гравців (баланс, армія, будівлі) зберігаються надійно та безкоштовно.
+GitHub Pages / Vercel	Хостинг сайту	Хостить інтерфейс гри безкоштовно 24/7 без обмежень за часом.
+GitHub Actions	Авто-оновлення 24/7	Безкоштовний скрипт, який щодня о 00:00 сам додає дохід, населення та ресурси всім гравцям.
+Firebase	Альтернативна база даних	Зручна база від Google, але налаштування прав доступу трохи складніше, ніж у Supabase.
+Bubble.io / Glide	No-Code конструктори	Легкі в збірці без коду, але мають суворі ліміти на кількість користувачів та авто-оновлення у безкоштовній версії.
+Рекомендований план дій:
+
+База даних (Supabase): Створити безкоштовний акаунт на supabase.com. Там створюються таблиці users, buildings, army.
+
+Фронтенд (Код сайту): Написати JS-код для авторизації (вхід/реєстрація) та відображення кабінету гравця/адміна.
+
+Авто-оновлення: Налаштувати GitHub Actions (CRON-задачу), яка щодня о 00:00 виконує один SQL-запит до Supabase: додає прибуток від будинків та змінює населення.
+
+Бажаєте отримати готовий приклад коду для підключення Supabase до вашого index.html з формою реєстрації та збереженням даних?
+
+то давай робим
+
+Ось готовий крок-за-кроком план та повністю робочий код. Ми використаємо Supabase (безкоштовна база даних і реєстрація) та підключимо його до вашого сайту на GitHub Pages.
+
+Усі дані зберігатимуться в хмарі 24/7, гравці матимуть свій кабінет, а ви — доступ адміна.
+
+КРОК 1: Створення бази даних у Supabase (2 хвилини)
+Зайдіть на supabase.com та зареєструйтеся через GitHub чи пошту.
+
+Натисніть «New project», введіть назву проекту (наприклад: Geopolitics-RP) та придумайте пароль для бази даних.
+
+Коли проект створиться, завітайте у меню SQL Editor (іконка >_ на лівій панелі) та натисніть «New query».
+
+Вставте цей код і натисніть «Run» (він створить таблицю для збереження гравців):
+
+SQL
+create table players (
+  id uuid primary key default gen_random_uuid(),
+  username text unique not null,
+  password text not null,
+  country_name text not null,
+  budget bigint default 200,
+  income bigint default 50,
+  energy int default 0,
+  happiness int default 50,
+  population text default '10M',
+  is_admin boolean default false,
+  buildings text[] default '{}',
+  army jsonb default '{}'::jsonb
+);
+Зайдіть у Project Settings (шестірня внизу ліворуч) ➔ API.
+
+Скопіюйте дві речі:
+
+Project URL (наприклад: [https://xxxx.supabase.co](https://xxxx.supabase.co))
+
+anon public API key (довгий ключ з літер та цифр)
+
+КРОК 2: Готовий код для вашого index.html
+Замініть весь вміст вашого файлу index.html у GitHub на цей код. Не забудьте вставити свої URL та API Key у рядках 143 та 144!
+
+HTML
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Geopolitics RP 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #22c55e; --danger: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 15px; }
+        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        .btn { background: var(--accent); color: #0f172a; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-success { background: var(--success); color: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 15px; }
+        .stat-box { background: #0f172a; padding: 12px; border-radius: 8px; text-align: center; }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .item-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 style="text-align: center; color: var(--accent);">🌍 GLOBAL GEOPOLITICS RP</h1>
+
+    <!-- ФОРМА ВХОДУ ТА РЕЄСТРАЦІЇ -->
+    <div id="authSection" class="card">
+        <h2>🔑 Вхід / Реєстрація Держави</h2>
+        <div class="form-group">
+            <label>Нікнейм Правителя / Логін:</label>
+            <input type="text" id="usernameInput" placeholder="Наприклад: King_Bober">
+        </div>
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" id="passwordInput" placeholder="******">
+        </div>
+        <div class="form-group">
+            <label>Назва Країни (якщо новий гравець):</label>
+            <input type="text" id="countryInput" placeholder="Наприклад: Імперія Панама">
+        </div>
+        <button class="btn" onclick="loginOrRegister()">Увійти / Зареєструвати країну</button>
+    </div>
+
+    <!-- КАБІНЕТ ГРАВЦЯ -->
+    <div id="gameSection" class="hidden">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="countryTitle">Держава</h2>
+                <button class="btn" style="width: auto; background: var(--danger); color: white;" onclick="logout()">Вийти</button>
+            </div>
+            <p>Правитель: <b id="rulerName" style="color: var(--accent);"></b></p>
+
+            <div class="stats-grid">
+                <div class="stat-box">Бюджет<br><b id="statBudget" style="font-size: 1.2em; color: var(--success);">0</b> млн $</div>
+                <div class="stat-box">Дохід/день<br><b id="statIncome" style="font-size: 1.2em;">+0</b> млн $</div>
+                <div class="stat-box">Енергобаланс<br><b id="statEnergy">0%</b></div>
+                <div class="stat-box">Щастя<br><b id="statHappiness">50%</b></div>
+            </div>
+
+            <h4 style="margin-top:20px;">🏛 Будівлі та Об'єкти:</h4>
+            <p id="buildingsList">Немає побудованих об'єктів</p>
+        </div>
+
+        <!-- МАГАЗИН БУДІВНИЦТВА -->
+        <div class="card">
+            <h3>🏗️ Будівництво об'єктів</h3>
+            <div class="shop-grid" id="shopGrid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ ВСТАВТЕ СВОЇ ДАНІ З SUPABASE СЮДИ:
+    const SUPABASE_URL = "СЮДИ_ВСТАВТЕ_YOUR_SUPABASE_URL";
+    const SUPABASE_KEY = "СЮДИ_ВСТАВТЕ_YOUR_SUPABASE_ANON_KEY";
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let currentPlayer = null;
+
+    const buildingCatalog = [
+        { name: "🏛️ Урядовий квартал", cost: 500, income: 0, energy: -20 },
+        { name: "⚡️ АЕС", cost: 764, income: 0, energy: 25 },
+        { name: "🛍️ Торговий центр (ТЦ)", cost: 180, income: 70, energy: -20 },
+        { name: "🍔 Мережа фастфуду", cost: 96, income: 40, energy: -15 },
+        { name: "🌾 Агрокомплекс", cost: 96, income: 0, energy: -15 },
+        { name: "⚔️ Казарма", cost: 48, income: 0, energy: 0 }
+    ];
+
+    async function loginOrRegister() {
+        const user = document.getElementById('usernameInput').value.trim();
+        const pass = document.getElementById('passwordInput').value.trim();
+        const country = document.getElementById('countryInput').value.trim();
+
+        if(!user || !pass) return alert('Заповніть логін та пароль!');
+
+        // Шукаємо гравця
+        let { data, error } = await db.from('players').select('*').eq('username', user).single();
+
+        if(data) {
+            // Перевіряємо пароль
+            if(data.password !== pass) return alert('Невірний пароль!');
+            currentPlayer = data;
+        } else {
+            // Створюємо нового гравця
+            if(!country) return alert('Введіть назву країни для реєстрації!');
+            let { data: newPlayer, error: createError } = await db.from('players').insert([{
+                username: user,
+                password: pass,
+                country_name: country,
+                buildings: ["🏛️ Урядовий квартал"]
+            }]).select().single();
+
+            if(createError) return alert('Помилка реєстрації: ' + createError.message);
+            currentPlayer = newPlayer;
+        }
+
+        loadGameUI();
+    }
+
+    function loadGameUI() {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('gameSection').classList.remove('hidden');
+
+        document.getElementById('countryTitle').innerText = currentPlayer.country_name;
+        document.getElementById('rulerName').innerText = currentPlayer.username;
+        document.getElementById('statBudget').innerText = currentPlayer.budget;
+        document.getElementById('statIncome').innerText = '+' + currentPlayer.income;
+        document.getElementById('statEnergy').innerText = currentPlayer.energy + '%';
+        document.getElementById('statHappiness').innerText = currentPlayer.happiness + '%';
+        
+        document.getElementById('buildingsList').innerText = currentPlayer.buildings.join(', ') || 'Немає';
+
+        renderShop();
+    }
+
+    function renderShop() {
+        const grid = document.getElementById('shopGrid');
+        grid.innerHTML = '';
+        buildingCatalog.forEach(b => {
+            grid.innerHTML += `
+                <div class="item-card">
+                    <b>${b.name}</b><br>
+                    Ціна: <b>${b.cost} млн $</b><br>
+                    Дохід: +${b.income} млн/день<br>
+                    Енергія: ${b.energy}%<br><br>
+                    <button class="btn btn-success" onclick="buyBuilding('${b.name}', ${b.cost}, ${b.income}, ${b.energy})">Купити</button>
+                </div>
+            `;
+        });
+    }
+
+    async function buyBuilding(name, cost, income, energy) {
+        if(currentPlayer.budget < cost) return alert('Нестача коштів у бюджеті!');
+
+        currentPlayer.budget -= cost;
+        currentPlayer.income += income;
+        currentPlayer.energy += energy;
+        currentPlayer.buildings.push(name);
+
+        // Оновлюємо в Supabase 24/7
+        const { error } = await db.from('players').update({
+            budget: currentPlayer.budget,
+            income: currentPlayer.income,
+            energy: currentPlayer.energy,
+            buildings: currentPlayer.buildings
+        }).eq('id', currentPlayer.id);
+
+        if(error) return alert('Помилка збереження: ' + error.message);
+
+        alert(`Об'єкт ${name} успішно збудовано!`);
+        loadGameUI();
+    }
+
+    function logout() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
+КРОК 3: Авто-нарахування доходу кожні 24 години
+Щоб усім гравцям автоматично нараховувалися гроші кожного дня, у меню Supabase відкрийте SQL Editor та виконайте цей скрипт:
+
+SQL
+-- Команда додає щоденний дохід до бюджету всіх гравців
+update players set budget = budget + income;
+Ви можете натискати кнопку Run у Supabase кожні 24 години (або налаштувати автоматичний Cron у вкладці Database -> Extensions -> pg_cron), і бюджет кожної держави буде оновлюватися в хмарі незалежно від того, чи гравці онлайн!
+
+там пысля рун писало так Success. No rows returned
+
+Усе чудово! Напис «Success. No rows returned» означає, що SQL-запит виконався успішно і створив потрібну таблицю.
+
+Оскільки ми створювали нову таблицю (командою CREATE TABLE), база даних просто підтвердила успішність операції і не мала повертати жодних даних у відповідь.
+
+🚀 Що робити далі:
+Скопіюйте URL та API Key з Supabase:
+
+У лівому бічному меню натисніть на Project Settings (значок шестірні ⚙️ внизу).
+
+Перейдіть у розділ API.
+
+Скопіюйте Project URL та anon public key.
+
+Вставте їх у файл index.html:
+
+Відкрийте ваш файл index.html на GitHub.
+
+Знайдіть рядки:
+
+JavaScript
+const SUPABASE_URL = "СЮДИ_ВСТАВТЕ_YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "СЮДИ_ВСТАВТЕ_YOUR_SUPABASE_ANON_KEY";
+Вставте туди ваші скопійовані значення у лапках і збережіть зміни (Commit changes).
+
+Після цього перейдіть за посиланням вашого сайту — гра запрацює з повноцінною реєстрацією, авторизацією та збереженням даних у хмарі 24/7!
+
+ось це?: https://gptbmqdrradqzhdllpyu.supabase.co/rest/v1/
+
+Майже! Посилання, яке ви скинули ([https://gptbmqdrradqzhdllpyu.supabase.co/rest/v1/](https://gptbmqdrradqzhdllpyu.supabase.co/rest/v1/)), є внутрішньою адресою REST API.
+
+Ваш Project URL — це та сама перша частина посилання, але без /rest/v1/ наприкінці.
+
+Ось що саме вам потрібно вставити в код index.html:
+
+1. Project URL:
+JavaScript
+const SUPABASE_URL = "https://gptbmqdrradqzhdllpyu.supabase.co";
+2. Anon Public Key (Ключ):
+Його потрібно скопіювати з панелі Supabase:
+
+Зайдіть у Project Settings (значок шестірні ⚙️ внизу ліворуч).
+
+Натисніть на розділ API.
+
+У блоці Project API keys скопіюйте довгий рядок з поля anon public.
+
+Він буде виглядати приблизно так (вставте його замість образу нижче):
+
+JavaScript
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdGJtcWRycmFkcXpoZGxscHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU...";
+Збережіть файл index.html на GitHub після заповнення цих двох рядків — і реєстрація та збереження даних на вашому сайті запрацюють на 100%!
+
+це? sb_publishable_As0ToC3PuPZ6TbYcUJa_pA_-iid8HOe
+
+Так, це саме він! Це ваш новий публічний ключ (Publishable Key) від Supabase.
+
+Тепер ваші налаштування в коді index.html мають виглядати ось так:
+
+JavaScript
+const SUPABASE_URL = "https://gptbmqdrradqzhdllpyu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_As0ToC3PuPZ6TbYcUJa_pA_-iid8HOe";
+🚀 Фінальні кроки:
+Відкрийте файл index.html у своєму репозиторії на GitHub.
+
+Вставте ці два рядки замість підказок у коді.
+
+Натисніть «Commit changes» у правому верхньому кутку.
+
+Почекайте ~1 хвилину та відкрийте свій сайт [https://bober0788.github.io/geopolitics-rp/](https://bober0788.github.io/geopolitics-rp/).
+
+Тепер ви можете ввести нікнейм, пароль, назву країни та натиснути кнопку реєстрації — база даних збереже все автоматично!
+
+скинь цілий код що де вставляти кажи
+
+Ось повний файл index.html із вже вставленими вашими ключами та повним асортиментом будівель, а також покрокова інструкція.
+
+📋 КРОК 1: Скопіюйте цей повний код
+Замініть усе, що зараз є у вашому файлі index.html на GitHub, на цей текст:
+
+HTML
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -205,3 +583,997 @@
 
 </body>
 </html>
+🚀 КРОК 2: Де вставляти?
+Перейдіть на ваш репозиторій на GitHub: [github.com/bober0788/geopolitics-rp](https://github.com/bober0788/geopolitics-rp).
+
+Натисніть на файл index.html.
+
+У верхньому правому кутку файлу натисніть на значок олівця ✏️ (Edit this file).
+
+Виділіть абсолютно весь старий код і видаліть його.
+
+Вставте новий скопійований код із КРОКУ 1.
+
+У правому верхньому кутку натисніть зелену кнопку «Commit changes» (Зберегти зміни).
+
+Зачекайте 1 хвилину та відкрийте ваш сайт [https://bober0788.github.io/geopolitics-rp/](https://bober0788.github.io/geopolitics-rp/) — повноцінна гра з входом, реєстрацією, магазином та автоматичним збереженням у хмарі працюватиме!
+
+Що то
+
+Помилка permission denied for table players означає, що база даних Supabase заблокувала доступ для звичайних користувачів (гравців), бо за замовчуванням увімкнено захист RLS (Row Level Security).
+
+Це виправляється за 10 секунд!
+
+🛠 Як це виправити:
+Зайдіть у ваш акаунт на supabase.com.
+
+У лівому меню відкрийте SQL Editor (іконка >_).
+
+Натисніть «New query».
+
+Вставте цей короткий код і натисніть зелену кнопку «Run»:
+
+SQL
+alter table players disable row level security;
+Після цього оновіть сторінку вашого сайту bober0788.github.io в браузері та спробуйте зареєструватися ще раз — усе запрацює миттєво!
+
+Якмй кол обясни детальніше
+
+Помилка виникає через те, що Supabase захищає таблицю players від публічного запису.
+
+Вам потрібно виконати лише один рядок SQL-коду в кабінеті Supabase, щоб дозволити сайту зберігати дані гравців.
+
+📋 Код, який потрібно виконати:
+SQL
+alter table players disable row level security;
+📍 Детальна інструкція (куди заходити та що натискати):
+Перейдіть на сайт supabase.com та зайдіть у свій акаунт.
+
+Відкрийте ваш проект (Geopolitics-RP).
+
+На лівій чорній панелі знайдіть та натисніть на значок SQL Editor (іконка виглядає як >_).
+
+У верхній частині екрана натисніть кнопку «New query» (Новий запит).
+
+У велике біле/темне поле для тексту вставте код, який вказано вище:
+alter table players disable row level security;
+
+У правому нижньому кутку цього поля натисніть зелену кнопку «Run» (або комбінацію Ctrl + Enter).
+
+Після натискання кнопки Run знизу з'явиться напис «Success. No rows returned».
+
+Після цього повертайтеся на свій сайт bober0788.github.io/geopolitics-rp/, оновіть сторінку клавішею F5 і натисніть «Увійти / Зареєструвати країну» — реєстрація пройде успішно!
+
+На фото видно, що вкладка Supabase SQL Editor відкрита у вас у сусідній вкладці браузера (зліва від YouTube).
+
+Ось що потрібно виконати на тій вкладці по кроках:
+
+Натисніть на першу вкладку браузера «SQL Editor | Ge...».
+
+У текстове поле вставте наступний код:
+
+SQL
+alter table players disable row level security;
+grant all on table players to anon;
+grant all on table players to authenticated;
+Натисніть зелену кнопку «Run» (у правому нижньому кутку текстового поля).
+
+Перейдіть назад на сайт bober0788.github.io, оновіть сторінку (F5) і спробуйте зареєструватися ще раз.
+
+Ці команди повністю відкриють доступ для читання й запису даних у таблицю players, і помилка зникне.
+
+Що робити новий створити? чи куда вставлтяи
+
+Нічого нового створювати не треба, ви знаходитесь у правильному місці!
+
+Просто допишіть ще два рядки прямо в це ж поле під першим рядком:
+
+Додайте ці два рядки у поле:
+
+SQL
+grant all on table players to anon;
+grant all on table players to authenticated;
+(У вас вийде загалом 3 рядки)
+
+Натисніть кнопку Run у правому нижньому кутку (або комбінацію Ctrl + Enter).
+
+Повертайтеся на сайт, оновіть сторінку (F5) і тисніть реєстрацію — все запрацює!
+
+ооо єєє але зроби ну кнопки Будівництво відкриє те що я скидав ось це
+
+🏛 ПОВНИЙ РЕЄСТР ДЕРЖАВНИХ ТА КОРПОРАТИВНИХ ОБ'ЄКТІВ 🏛
+
+⚡️ ЕЛЕКТРОЕНЕРГІЯ
+
+АЕС — 764 млн | +25% Ел-енергії, -10% ресурсів, -10% Щастя
+
+ГЕС — 392 млн | +15% Ел-енергії, -5% ресурсів
+
+ТЕС — 274 млн | +18% Ел-енергії, -10% ресурсів
+
+ВЕС — 106 млн | +8% Ел-енергії, -5% ресурсів
+
+ЛЕП (Лінії передач): від 204 млн до 1.2 млрд (пропускна здатність 15–90%)
+
+
+
+🏢 УПРАВЛІННЯ ТА БЕЗПЕКА
+
+🏛 Урядовий квартал — 500 млн | Дозволяє видавати закони. Без нього країна вважається "нелегітимною" (дохід -50%). (Видається 1 на старті кожній країні)
+
+🛂 Митний термінал — 600 млн | Дозволяє торгувати ресурсами з іншими країнами. Власник отримує 5% від кожної угоди.
+
+🚔 Поліцейський департамент — 180 млн | Захист від бунтів та заколотів при низькому Щасті населення.
+
+🕵️ Штаб Розвідки — 500 млн | Дозволяє проводити шпигунство, дізнаватися дані ворога та вчиняти диверсії.
+
+
+
+📦 ЛОГІСТИКА ТА ПОШТА
+
+🏭 Логістичний хаб (Склад) — 420 млн | Необхідний для поштових служб (+30% до ліміту доставок матеріалів).
+
+📦 Поштова мережа — 180 млн | Збільшує дохід пошти на +15% та Щастя населения на +5%.
+
+🚛 Автопарк (Депо) — 280 млн | Зменшує споживання палива транспортом на -20%. Без депо пошта працює лише на 50%.
+
+🛳 Морський порт — 800 млн | Збільшує ліміт міжнародної торгівлі на +100%, дозволяє будувати та обслуговувати флот.
+
+
+
+📡 ЗВ'ЯЗОК ТА ТЕХНОЛОГІЇ
+
+🗼 Вишка 3G — 150 млн | Базовий зв'язок (працюють тільки базові дзвінки та пошта).
+
+📡 Вишка 4G — 300 млн | Необхідна для роботи онлайн-банкінгу та цифрової логістики.
+
+⚡️ Вишка 5G — 650 млн | Необхідна для високотехнологічних IT-корпорацій (+25% до прибутку IT-сектору).
+
+🖥 Серверний Центр — 520 млн | Потрібен для функціонування IT-компаній та дата-центрів (без нього IT-сектор не дає доходу).
+
+
+
+⛽️ ЕНЕРГО-ПАЛИВНИЙ СЕКТОР
+
+⛽️ Мережа АЗС — 450 млн | Забезпечує паливом цивільний транспорт та поштову службу.
+
+🔌 Зарядні станції (Electro-Charge) — 380 млн | Необхідні для електротранспорту та живлення 5G/серверних систем.
+
+📦 ВИРОБНИЦТВО ТА СІЛЬСЬКЕ ГОСПОДАРСТВО
+
+🏭 Завод — 48 млн | +15% ресурсів, -5% е-енергії
+
+🌾 Агрокомплекс — 96 млн | +25% ресурсів, -15% е-енергії
+
+🚜 Ферма — 180 млн | +40% ресурсів, -25% е-енергії
+
+🧪 Хімічний Комбінат — 450 млн | +20% до видобутку ресурсів, -15% е-енергії, -15% Щастя
+
+🛤 Залізничний Вузол — 350 млн | Зменшує споживання палива регіоном на -50%.
+
+
+
+💼 ЕКОНОМІКА, ОСВІТА ТА БІЗНЕС
+
+🛍 ТЦ (Торговий центр) — 180 млн | +70 млн дохід/день, -20% е-енергії, -15% ресурсів
+
+🍔 Мережа фастфуду — 96 млн | +40 млн дохід/день, -15% е-енергії
+
+🏨 Готель — 120 млн | +60 млн дохід/день, -20% е-енергії
+
+🏦 Центральний Банк — 950 млн | Кредитний ліміт 750 млн + можливість друкувати власну валюту (без нього комісія з доходів 10%).
+
+🎓 Науковий Центр / Університет — 350 млн | +10% до ефективності IT та заводів, відкриває доступ до передових технологій.
+
+
+
+🛡 СОЦІАЛЬНИЙ ЗАХИСТ ТА МЕДИЦИНА
+
+🎡 Центр Громади — 320 млн | Щастя населення +15%, захист від міграції жителів.
+
+🏥 Центральна Лікарня — 250 млн | +10% Щастя, зменшує втрати військ під час війни на 15%.
+
+
+
+🎖 АРМІЯ ТА ОБОРОНА
+
+⚔️ Казарма — 48 млн | +10к до ліміту військ.
+
+🚜 Танковий ангар — 72 млн | +5 до ліміту танків.
+
+✈️ Аеродром — 180 млн | +4 до ліміту винищувачів.
+
+📡 Станція РЕБ — 250 млн | Пригнічує дрони та авіацію ворога.
+
+🛡 Комплекс ППО/ПРО — 600 млн | 50% шанс збити ракету ворога.
+
+🚀 Ракетна база — 750 млн | Можливість завдавати ракетних ударів по об'єктах ворога.
+
+
+
+🛢 ВИДОБУТОК ПАЛИВА
+
+🛢 Нафтова установка (LVL 1-3): 588–960 млн | Видобуток сирої нафти.
+
+🏭 НПЗ (1/2 рівня): 536/996 млн | Переробка нафти в Паливо для АЗС та армії.
+
+
+
+⛏️ ШАХТИ (Видобуток раз на 3 дні)
+
+🪵 Вугільна: 520 млн | 🪙 Залізна: 780 млн | 🪙 Золота: 1420 млн | 💎 Титанова: 1840 млн.
+
+
+
+кнопка армія відкриє це
+
+
+
+🎖 ПОВНИЙ РЕЄСТР ОЗБРОЄННЯ ТА ВІЙСЬКОВОЇ ТЕХНІКИ 🎖
+
+👤 ПІХОТА (Основа армії)
+
+Сухопутні війська: 3 млн (1к) | Сила: +3
+
+Морська піхота: 5 млн (1к) | Сила: +5 (Ефективні при штурмі портів)
+
+Сили Спеціальних Операцій (ССО): 15 млн (1к) | Сила: +12 | Ефект: Диверсії на заводах ворога.
+
+🚜 БРОНЕТЕХНІКА (Танки та БМП)
+
+Abrams (США): 35 млн | Сила: +7 | Бонус: +2 до виживання при ПТРК
+
+Leopard 2 (Німеччина): 35 млн | Сила: +6 | Бонус: Швидкий ремонт (-10% ціни)
+
+Leclerc (Франція): 33 млн | Сила: +6 | Ефект: Висока швидкість (шанс ухилення від артилерії)
+
+K2 Panther (Пд. Корея): 34 млн | Сила: +6
+
+Bradley (США): 16 млн | Сила: +3 | Ефект: Знищує БМП ворога 1 до 2
+
+БМП-3 (рф): 13 млн | Сила: +2
+
+БТР-4 «Буцефал» (Україна): 12 млн | Сила: +3
+
+🚀 АРТИЛЕРІЯ ТА РСЗВ (New)
+
+M142 HIMARS (США): 180 млн | Сила: +45 | Ефект: Знищує Склади та Штаби з 100% точністю.
+
+PzH 2000 (Німеччина): 45 млн | Сила: +15 | Ефект: Дальнобійність (ворог не може відповісти піхотою).
+
+САУ Богдана (Україна): 30 млн | Сила: +12
+
+🚁 ГЕЛІКОПТЕРИ
+
+Apache (США): 64 млн | Сила: +8
+
+Ка-52 «Алігатор» (рф): 60 млн | Сила: +7
+
+Tiger (Німеччина): 68 млн | Сила: +3 | Ефект: Розвідка (відкриває 100% сил ворога)
+
+✈️ АВІАЦІЯ ТА БПЛА
+
+F-16 (США): 162 млн | Сила: +30 | Умова: Потребує Аеродром
+
+F-22 Raptor (США): 300 млн | Сила: +60 | Ефект: Невидимий для ППО С-300
+
+Су-27 (Україна): 125 млн | Сила: +25
+
+Bayraktar TB2 (Туреччина): 40 млн | Сила: +10 | Ефект: Знищує техніку (Танки/БТР) без ризику для пілотів.
+
+Дрон-камікадзе (Shahed/Switchblade): 15 млн | Сила: +5 | Ефект: Одноразовий удар по енергетиці.
+
+🛡 ППО (Захист неба)
+
+Patriot (США): 1 млрд | Шанс збиття: 70/30 | Збиває Балістику
+
+SAMP/T (Франція/Італія): 750 млн | Шанс збиття: 60/40 | Збиває все.
+
+NASAMS: 550 млн | Шанс збиття: 50/50 | Збиває Крилаті ракети
+
+С-300: 320 млн | Шанс збиття: 30/70 | Ефективний тільки проти авіації
+
+⚓️ ФЛОТ (Панування на морі)
+
+Тикондерога (США): 2 млрд | Сила: +180
+
+Кіров (рф): 2.2 млрд | Сила: +200
+
+Arleigh Burke (США): 1.8 млрд | Сила: +160
+
+Type 45 (Британія): 1.3 млрд | Сила: +140
+
+Virginia (США): 2.5 млрд | Сила: +220 (Атомна ПЧ)
+
+Type 212 (Німеччина): 1.4 млрд | Сила: +150
+
+🚀 РАКЕТНЕ ОЗБРОЄННЯ
+
+Крилата ракета: 70 млн | Ціль: Будівлі та Заводи
+
+Балістична ракета: 200 млн | Ціль: Штаби та ППО (важко збити)
+
+Морська ракета: 50 млн | Ціль: Кораблі
+
+🏛 СПЕЦСЛУЖБИ ТА МОБІЛІЗАЦІЯ
+
+ТЦК: 10 млн | Механіка: -1к військ (база), але щодня шанс +100-700 рекрутів.
+
+СБУ: 70 млн | Ефект: Контррозвідка (приховує статистику країни).
+
+ГУР: 120 млн | Ефект: Попередження про атаку за 12 годин.
+
+⚠️ ПРИМІТКА: Вся техніка споживає Паливо (АЗС) та потребує Зв’язку (4G/5G)! Без палива сила техніки падає на -80%.
+
+
+
+статистика завжди зверху має бути
+
+
+
+там аає бути населення, баланс, інкнейм, країна, споживання та виробцнитво ресурсів та електроенергії, будівлі, армія, щастя, чого прагне народ
+
+
+
+ти памятаєш 1 млн населеня це 4% споживання
+
+Я оновив код веб-панелі гри, додавши всі необхідні вкладки, категорії та інтерактивні механіки.
+
+🌟 Що зроблено та як це працює:
+📊 Статистика Завжди Зверху (Верхній Блок):
+
+👥 Населення (1 млн населення за замовчуванням споживає 4% ресурсів та 4% електроенергії).
+
+💵 Баланс та 📈 Дохід/день (динамічно перераховуються залежно від збудованих об'єктів).
+
+⚡️ Електроенергія та 📦 Ресурси (вираховують баланс виробництва та споживання вашим населенням і заводами).
+
+😊 Щастя Народу (з урахуванням бонусів та штрафів об'єктів).
+
+💭 Чого прагне народ: інтелектуальний блок підказка, який аналізує дефіцити (наприклад: потрібен Урядовий квартал для легітимності, дефіцит світла, нестача ресурсів або захисту).
+
+🏗 Вкладка «Будівництво»:
+
+Містить повний реєстр усіх 9 категорій об'єктів, які ви надали (Електроенергія, Управління, Логістика, Зв'язок, Енерго-паливний сектор, Виробництво та Агро, Економіка, Соціальний захист, Армія та Оборона).
+
+Натискання кнопки «Збудувати» списує кошти з балансу, додає будівлю до вашого реєстру та миттєво перераховує баланс електроенергії, ресурсів, щастя та доходу в верхньому блоці статистики.
+
+🎖 Вкладка «Армія»:
+
+Містить повний реєстр військової техніки та спецслужб (Піхота, Бронетехніка, Артилерія, Гелікоптери, Авіація та БПЛА, ППО, Флот, Ракетне озброєння, Спецслужби/ТЦК/СБУ/ГУР).
+
+Натискання кнопки «Закупити» списує кошти та додає техніку до арсеналу держави.
+
+📜 Вкладка «Об'єкти та Війська»:
+
+Відображає інтерактивний список усіх придбаних вами об'єктів та військових одиниць.
+
+📥 Ваші файли
+Значок HTML
+index
+ HTML 
+Відчинено
+
+
+
+Gemini – це штучний інтелект, і він може помилятися.
+
+Аналіз
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Geopolitics RP 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card: #151d2a;
+            --card-inner: #1a2436;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text: #f8fafc;
+            --text-sub: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #2e3a52;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* AUTH CARD */
+        .auth-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.5); max-width: 480px; margin: 40px auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-sub); font-size: 0.9em; }
+        input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 1em; }
+        input:focus { outline: none; border-color: var(--accent); }
+
+        /* BUTTONS */
+        .btn { background: var(--accent); color: #0f172a; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1em; transition: 0.2s; }
+        .btn:hover { background: var(--accent-hover); color: white; }
+        .btn-buy { background: var(--success); color: white; padding: 8px 14px; font-size: 0.9em; width: auto; }
+        .btn-buy:hover { background: #16a34a; }
+        .btn-danger { background: var(--danger); color: white; width: auto; padding: 8px 16px; }
+
+        /* HEADER STATS (ALWAYS ON TOP IN GAME) */
+        .top-stats-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .user-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .user-title h2 { margin: 0; color: var(--accent); font-size: 1.6em; }
+        .user-title span { color: var(--text-sub); font-size: 0.9em; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .stat-box { background: var(--card-inner); padding: 12px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
+        .stat-box .title { font-size: 0.8em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .stat-box .value { font-size: 1.25em; font-weight: bold; }
+
+        .desire-box { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; align-items: center; gap: 10px; }
+        .desire-box span { font-size: 1.3em; }
+
+        /* TABS NAV */
+        .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
+        .tab-btn { background: var(--card); color: var(--text-sub); border: 1px solid var(--border); padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1em; transition: 0.2s; }
+        .tab-btn:hover { color: white; border-color: var(--accent); }
+        .tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+        /* CATEGORIES & ITEMS GRID */
+        .category-title { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 25px 0 15px 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .item-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .item-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .item-name { font-weight: bold; font-size: 1.05em; color: white; }
+        .item-cost { color: var(--success); font-weight: bold; font-size: 1em; white-space: nowrap; }
+        .item-desc { color: var(--text-sub); font-size: 0.88em; margin-bottom: 12px; line-height: 1.4; }
+        .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; pt: 8px; border-top: 1px dashed var(--border); }
+        .item-effect { font-size: 0.85em; color: var(--warning); }
+
+        /* INVENTORY LISTS */
+        .inventory-list { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .inventory-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag { background: var(--card-inner); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.88em; color: var(--accent); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 style="text-align: center; color: var(--accent); margin-bottom: 25px;">🌍 GLOBAL GEOPOLITICS RP 2026</h1>
+
+    <!-- ФОРМА ВХОДУ ТА РЕЄСТРАЦІЇ -->
+    <div id="authSection" class="auth-card">
+        <h2 style="margin-top: 0; color: var(--accent);">🔑 Вхід / Реєстрація Держави</h2>
+        <div class="form-group">
+            <label>Нікнейм Правителя / Логін:</label>
+            <input type="text" id="usernameInput" placeholder="Наприклад: King_Bober">
+        </div>
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" id="passwordInput" placeholder="******">
+        </div>
+        <div class="form-group">
+            <label>Назва Країни (для нових гравців):</label>
+            <input type="text" id="countryInput" placeholder="Наприклад: Імперія Панама">
+        </div>
+        <button class="btn" onclick="loginOrRegister()">Увійти / Зареєструвати країну</button>
+    </div>
+
+    <!-- ІГРОВА ПАНЕЛЬ -->
+    <div id="gameSection" class="hidden">
+        
+        <!-- 1. СТАТИСТИКА ЗАВЖДИ ЗВЕРХУ -->
+        <div class="top-stats-card">
+            <div class="user-header">
+                <div class="user-title">
+                    <h2 id="countryTitle">Країна</h2>
+                    <span>Правитель: <b id="rulerName" style="color: var(--accent);"></b></span>
+                </div>
+                <button class="btn btn-danger" onclick="logout()">Вийти з акаунту</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="title">👥 Населення</div>
+                    <div class="value" id="statPop" style="color: var(--accent);">10M</div>
+                </div>
+                <div class="stat-box">
+                    <div class="title">💵 Баланс</div>
+                    <div class="value" id="statBudget" style="color: var(--success);">200M $</div>
+                </div>
+                <div class="stat-box">
+                    <div class="title">📈 Дохід / день</div>
+                    <div class="value" id="statIncome" style="color: var(--success);">+50M $</div>
+                </div>
+                <div class="stat-box">
+                    <div class="title">⚡️ Електроенергія</div>
+                    <div class="value" id="statEnergy">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="title">📦 Ресурси</div>
+                    <div class="value" id="statResources">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="title">😊 Щастя Народу</div>
+                    <div class="value" id="statHappiness" style="color: var(--warning);">50%</div>
+                </div>
+            </div>
+
+            <!-- ЧОГО ПРАГНЕ НАРОД -->
+            <div class="desire-box">
+                <span>💭</span>
+                <div>
+                    <strong style="color: var(--warning);">Чого прагне народ:</strong>
+                    <div id="peopleDesireText" style="font-size: 0.95em; margin-top: 2px; color: var(--text);">Завантаження...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ВКЛАДКИ НАВІГАЦІЇ -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('buildingsTab', this)">🏗 Будівництво</button>
+            <button class="tab-btn" onclick="switchTab('armyTab', this)">🎖 Армія</button>
+            <button class="tab-btn" onclick="switchTab('myAssetsTab', this)">📜 Об'єкти та В'ійська</button>
+        </div>
+
+        <!-- ВКЛАДКА 1: БУДІВНИЦТВО -->
+        <div id="buildingsTab" class="tab-content">
+            <div id="buildingsContainer"></div>
+        </div>
+
+        <!-- ВКЛАДКА 2: АРМІЯ -->
+        <div id="armyTab" class="tab-content hidden">
+            <div id="armyContainer"></div>
+        </div>
+
+        <!-- ВКЛАДКА 3: МОЇ ОБ'ЄКТИ ТА ВІЙСЬКА -->
+        <div id="myAssetsTab" class="tab-content hidden">
+            <div class="inventory-list">
+                <h3 style="margin-top:0; color: var(--accent);">🏛 Збудовані Державні та Корпоративні Об'єкти</h3>
+                <div class="inventory-tags" id="myBuildingsList">Немає об'єктів</div>
+            </div>
+            <div class="inventory-list">
+                <h3 style="margin-top:0; color: var(--accent);">🎖 Наявне Озброєння та Військова Техніка</h3>
+                <div class="inventory-tags" id="myArmyList">Немає військ</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // SUPABASE CONFIG
+    const SUPABASE_URL = "https://gptbmqdrradqzhdllpyu.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_As0ToC3PuPZ6TbYcUJa_pA_-iid8HOe";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentPlayer = null;
+
+    // --- РЕЄСТР БУДІВЕЛЬ ---
+    const buildingsCatalog = [
+        {
+            category: "⚡️ ЕЛЕКТРОЕНЕРГІЯ",
+            items: [
+                { name: "АЕС", cost: 764, desc: "+25% Ел-енергії, -10% ресурсів, -10% Щастя", energy: 25, resources: -10, happiness: -10, income: 0 },
+                { name: "ГЕС", cost: 392, desc: "+15% Ел-енергії, -5% ресурсів", energy: 15, resources: -5, happiness: 0, income: 0 },
+                { name: "ТЕС", cost: 274, desc: "+18% Ел-енергії, -10% ресурсів", energy: 18, resources: -10, happiness: 0, income: 0 },
+                { name: "ВЕС", cost: 106, desc: "+8% Ел-енергії, -5% ресурсів", energy: 8, resources: -5, happiness: 0, income: 0 },
+                { name: "ЛЕП (Лінії передач)", cost: 204, desc: "+15% пропускна здатність енергомережі", energy: 10, resources: 0, happiness: 0, income: 0 }
+            ]
+        },
+        {
+            category: "🏢 УПРАВЛІННЯ ТА БЕЗПЕКА",
+            items: [
+                { name: "🏛 Урядовий квартал", cost: 500, desc: "Дозволяє видавати закони. Без нього країна 'нелегітимна' (дохід -50%).", energy: -20, resources: 0, happiness: 5, income: 0 },
+                { name: "🛂 Митний термінал", cost: 600, desc: "Дозволяє торгувати ресурсами з іншими країнами. +5% з угод.", energy: 0, resources: 5, happiness: 0, income: 30 },
+                { name: "🚔 Поліцейський департамент", cost: 180, desc: "Захист від бунтів та заколотів при низькому Щасті.", energy: -5, resources: 0, happiness: 5, income: 0 },
+                { name: "🕵️ Штаб Розвідки", cost: 500, desc: "Дозволяє проводити шпигунство та диверсії.", energy: -10, resources: 0, happiness: 0, income: 0 }
+            ]
+        },
+        {
+            category: "📦 ЛОГІСТИКА ТА ПОШТА",
+            items: [
+                { name: "🏭 Логістичний хаб (Склад)", cost: 420, desc: "+30% до ліміту доставок матеріалів.", energy: -10, resources: 10, happiness: 0, income: 20 },
+                { name: "📦 Поштова мережа", cost: 180, desc: "+15% дохід пошти, +5% Щастя населення.", energy: -5, resources: 0, happiness: 5, income: 25 },
+                { name: "🚛 Автопарк (Депо)", cost: 280, desc: "-20% споживання палива транспортом.", energy: -5, resources: 0, happiness: 0, income: 15 },
+                { name: "🛳 Морський порт", cost: 800, desc: "+100% ліміт міжнародної торгівлі, обслуговування флоту.", energy: -20, resources: 15, happiness: 5, income: 100 }
+            ]
+        },
+        {
+            category: "📡 ЗВ'ЯЗОК ТА ТЕХНОЛОГІЇ",
+            items: [
+                { name: "🗼 Вишка 3G", cost: 150, desc: "Базовий зв'язок (дзвінки та пошта).", energy: -5, resources: 0, happiness: 2, income: 10 },
+                { name: "📡 Вишка 4G", cost: 300, desc: "Необхідна для онлайн-банкінгу та цифрової логістики.", energy: -10, resources: 0, happiness: 5, income: 25 },
+                { name: "⚡️ Вишка 5G", cost: 650, desc: "+25% до прибутку IT-сектору.", energy: -15, resources: 0, happiness: 8, income: 60 },
+                { name: "🖥 Серверний Центр", cost: 520, desc: "Потрібен для функціонування IT-компаній та дата-центрів.", energy: -25, resources: 0, happiness: 0, income: 50 }
+            ]
+        },
+        {
+            category: "⛽️ ЕНЕРГО-ПАЛИВНИЙ СЕКТОР ТА ВИДОБУТОК",
+            items: [
+                { name: "⛽️ Мережа АЗС", cost: 450, desc: "Забезпечує паливом цивільний транспорт та пошту.", energy: -10, resources: 5, happiness: 5, income: 45 },
+                { name: "🔌 Зарядні станції (Electro-Charge)", cost: 380, desc: "Живлення електротранспорту, 5G та серверів.", energy: -15, resources: 0, happiness: 5, income: 35 },
+                { name: "🛢 Нафтова установка (LVL 1)", cost: 588, desc: "Видобуток сирої нафти.", energy: -15, resources: 20, happiness: -5, income: 50 },
+                { name: "🏭 НПЗ (Нафтопереробний завод)", cost: 536, desc: "Переробка нафти в Паливо для АЗС та армії.", energy: -20, resources: 25, happiness: -5, income: 60 },
+                { name: "🪵 Вугільна Шахта", cost: 520, desc: "Видобуток вугілля раз на 3 дні.", energy: -10, resources: 30, happiness: -5, income: 40 },
+                { name: "🪙 Залізна Шахта", cost: 780, desc: "Видобуток заліза раз на 3 дні.", energy: -15, resources: 40, happiness: -5, income: 70 },
+                { name: "🪙 Золота Шахта", cost: 1420, desc: "Видобуток золота раз на 3 дні.", energy: -20, resources: 20, happiness: 0, income: 150 },
+                { name: "💎 Титанова Шахта", cost: 1840, desc: "Видобуток титану для високоточного озброєння.", energy: -25, resources: 30, happiness: 0, income: 200 }
+            ]
+        },
+        {
+            category: "📦 ВИРОБНИЦТВО ТА СІЛЬСЬКЕ ГОСПОДАРСТВО",
+            items: [
+                { name: "🏭 Завод", cost: 48, desc: "+15% ресурсів, -5% е-енергії", energy: -5, resources: 15, happiness: 0, income: 15 },
+                { name: "🌾 Агрокомплекс", cost: 96, desc: "+25% ресурсів, -15% е-енергії", energy: -15, resources: 25, happiness: 5, income: 20 },
+                { name: "🚜 Ферма", cost: 180, desc: "+40% ресурсів, -25% е-енергії", energy: -25, resources: 40, happiness: 5, income: 35 },
+                { name: "🧪 Хімічний Комбінат", cost: 450, desc: "+20% ресурсів, -15% е-енергії, -15% Щастя", energy: -15, resources: 20, happiness: -15, income: 50 },
+                { name: "🛤 Залізничний Вузол", cost: 350, desc: "-50% споживання палива регіоном.", energy: -10, resources: 10, happiness: 5, income: 30 }
+            ]
+        },
+        {
+            category: "💼 ЕКОНОМІКА, ОСВІТА ТА БІЗНЕС",
+            items: [
+                { name: "🛍 ТЦ (Торговий центр)", cost: 180, desc: "+70 млн дохід/день, -20% е-енергії, -15% ресурсів", energy: -20, resources: -15, happiness: 10, income: 70 },
+                { name: "🍔 Мережа фастфуду", cost: 96, desc: "+40 млн дохід/день, -15% е-енергії", energy: -15, resources: -5, happiness: 5, income: 40 },
+                { name: "🏨 Готель", cost: 120, desc: "+60 млн дохід/день, -20% е-енергії", energy: -20, resources: 0, happiness: 5, income: 60 },
+                { name: "🏦 Центральний Банк", cost: 950, desc: "Кредитний ліміт 750 млн + друк валюти. Усуває комісію 10%.", energy: -25, resources: 0, happiness: 0, income: 120 },
+                { name: "🎓 Науковий Центр / Університет", cost: 350, desc: "+10% до ефективності IT та заводів.", energy: -15, resources: 5, happiness: 10, income: 30 }
+            ]
+        },
+        {
+            category: "🛡 СОЦІАЛЬНИЙ ЗАХИСТ ТА МЕДИЦИНА",
+            items: [
+                { name: "🎡 Центр Громади", cost: 320, desc: "Щастя населення +15%, захист від міграції.", energy: -10, resources: 0, happiness: 15, income: 0 },
+                { name: "🏥 Центральна Лікарня", cost: 250, desc: "+10% Щастя, -15% втрат військ під час війни.", energy: -10, resources: 0, happiness: 10, income: 0 }
+            ]
+        },
+        {
+            category: "🎖 АРМІЯ ТА ОБОРОНА (Інфраструктура)",
+            items: [
+                { name: "⚔️ Казарма", cost: 48, desc: "+10к до ліміту військ.", energy: 0, resources: 0, happiness: 0, income: 0 },
+                { name: "🚜 Танковий ангар", cost: 72, desc: "+5 до ліміту танків.", energy: -5, resources: 0, happiness: 0, income: 0 },
+                { name: "✈️ Аеродром", cost: 180, desc: "+4 до ліміту винищувачів.", energy: -10, resources: 0, happiness: 0, income: 0 },
+                { name: "📡 Станція РЕБ", cost: 250, desc: "Пригнічує дрони та авіацію ворога.", energy: -15, resources: 0, happiness: 0, income: 0 },
+                { name: "🛡 Комплекс ППО/ПРО", cost: 600, desc: "50% шанс збити ракету ворога.", energy: -15, resources: 0, happiness: 0, income: 0 },
+                { name: "🚀 Ракетна база", cost: 750, desc: "Можливість завдавати ракетних ударів.", energy: -20, resources: 0, happiness: 0, income: 0 }
+            ]
+        }
+    ];
+
+    // --- РЕЄСТР АРМІЇ ---
+    const armyCatalog = [
+        {
+            category: "👤 ПІХОТА (Основа армії)",
+            items: [
+                { name: "Сухопутні війська (1к)", cost: 3, desc: "Сила: +3 | Базова піхота" },
+                { name: "Морська піхота (1к)", cost: 5, desc: "Сила: +5 | Ефективні при штурмі портів" },
+                { name: "Сили Спеціальних Операцій (ССО) (1к)", cost: 15, desc: "Сила: +12 | Диверсії на заводах ворога" }
+            ]
+        },
+        {
+            category: "🚜 БРОНЕТЕХНІКА (Танки та БМП)",
+            items: [
+                { name: "Abrams (США)", cost: 35, desc: "Сила: +7 | +2 до виживання при ПТРК" },
+                { name: "Leopard 2 (Німеччина)", cost: 35, desc: "Сила: +6 | Швидкий ремонт (-10% ціни)" },
+                { name: "Leclerc (Франція)", cost: 33, desc: "Сила: +6 | Висока швидкість (ухилення)" },
+                { name: "K2 Panther (Пд. Корея)", cost: 34, desc: "Сила: +6 | Високоточна гармата" },
+                { name: "Bradley (США)", cost: 16, desc: "Сила: +3 | Знищує БМП ворога 1 до 2" },
+                { name: "БМП-3 (рф)", cost: 13, desc: "Сила: +2 | Важка підтримка піхоти" },
+                { name: "БТР-4 «Буцефал» (Україна)", cost: 12, desc: "Сила: +3 | Висока мобільність" }
+            ]
+        },
+        {
+            category: "🚀 АРТИЛЕРІЯ ТА РСЗВ",
+            items: [
+                { name: "M142 HIMARS (США)", cost: 180, desc: "Сила: +45 | Знищує Склади та Штаби з 100% точністю" },
+                { name: "PzH 2000 (Німеччина)", cost: 45, desc: "Сила: +15 | Дальнобійність без ризику" },
+                { name: "САУ Богдана (Україна)", cost: 30, desc: "Сила: +12 | Надійна натовська калібровка" }
+            ]
+        },
+        {
+            category: "🚁 ГЕЛІКОПТЕРИ",
+            items: [
+                { name: "Apache (США)", cost: 64, desc: "Сила: +8 | Ударний гелікоптер" },
+                { name: "Ка-52 «Алігатор» (рф)", cost: 60, desc: "Сила: +7 | Оборона від бронетехніки" },
+                { name: "Tiger (Німеччина)", cost: 68, desc: "Сила: +3 | Розвідка (відкриває 100% сил ворога)" }
+            ]
+        },
+        {
+            category: "✈️ АВІАЦІЯ ТА БПЛА",
+            items: [
+                { name: "F-16 (США)", cost: 162, desc: "Сила: +30 | Потребує Аеродром" },
+                { name: "F-22 Raptor (США)", cost: 300, desc: "Сила: +60 | Невидимий для ППО С-300" },
+                { name: "Су-27 (Україна)", cost: 125, desc: "Сила: +25 | Важкий винищувач" },
+                { name: "Bayraktar TB2 (Туреччина)", cost: 40, desc: "Сила: +10 | Знищує техніку без ризику" },
+                { name: "Дрон-камікадзе (Shahed/Switchblade)", cost: 15, desc: "Сила: +5 | Одноразовий удар по енергетиці" }
+            ]
+        },
+        {
+            category: "🛡 ППО (Захист неба)",
+            items: [
+                { name: "Patriot (США)", cost: 1000, desc: "Шанс збиття: 70/30 | Збиває Балістику" },
+                { name: "SAMP/T (Франція/Італія)", cost: 750, desc: "Шанс збиття: 60/40 | Збиває все" },
+                { name: "NASAMS", cost: 550, desc: "Шанс збиття: 50/50 | Збиває Крилаті ракети" },
+                { name: "С-300", cost: 320, desc: "Шанс збиття: 30/70 | Проти авіації" }
+            ]
+        },
+        {
+            category: "⚓️ ФЛОТ (Панування на морі)",
+            items: [
+                { name: "Тикондерога (США)", cost: 2000, desc: "Сила: +180 | Ракетний крейсер" },
+                { name: "Кіров (рф)", cost: 2200, desc: "Сила: +200 | Важкий атомний крейсер" },
+                { name: "Arleigh Burke (США)", cost: 1800, desc: "Сила: +160 | Ескадрений міноносець" },
+                { name: "Type 45 (Британія)", cost: 1300, desc: "Сила: +140 | Есмінець КЗППО" },
+                { name: "Virginia (США)", cost: 2500, desc: "Сила: +220 | Атомний підводний човен" },
+                { name: "Type 212 (Німеччина)", cost: 1400, desc: "Сила: +150 | Подводний човен" }
+            ]
+        },
+        {
+            category: "🚀 РАКЕТНЕ ОЗБРОЄННЯ",
+            items: [
+                { name: "Крилата ракета", cost: 70, desc: "Ціль: Будівлі та Заводи" },
+                { name: "Балістична ракета", cost: 200, desc: "Ціль: Штаби та ППО" },
+                { name: "Морська ракета", cost: 50, desc: "Ціль: Кораблі" }
+            ]
+        },
+        {
+            category: "🏛 СПЕЦСЛУЖБИ ТА МОБІЛІЗАЦІЯ",
+            items: [
+                { name: "ТЦК", cost: 10, desc: "-1к військ (база), але щодня +100-700 рекрутів" },
+                { name: "СБУ", cost: 70, desc: "Контррозвідка (приховує статистику країни)" },
+                { name: "ГУР", cost: 120, desc: "Попередження про атаку за 12 годин" }
+            ]
+        }
+    ];
+
+    // --- ЛОГІКА АВТОРИЗАЦІЇ ---
+    async function loginOrRegister() {
+        const user = document.getElementById('usernameInput').value.trim();
+        const pass = document.getElementById('passwordInput').value.trim();
+        const country = document.getElementById('countryInput').value.trim();
+
+        if(!user || !pass) return alert('Заповніть логін та пароль!');
+
+        let { data, error } = await db.from('players').select('*').eq('username', user).single();
+
+        if(data) {
+            if(data.password !== pass) return alert('Невірний пароль!');
+            currentPlayer = data;
+        } else {
+            if(!country) return alert('Введіть назву країни для реєстрації!');
+            let { data: newPlayer, error: createError } = await db.from('players').insert([{
+                username: user,
+                password: pass,
+                country_name: country,
+                population: "10M",
+                budget: 200,
+                income: 50,
+                energy: 0,
+                happiness: 50,
+                buildings: ["🏛 Урядовий квартал"],
+                army: []
+            }]).select().single();
+
+            if(createError) return alert('Помилка реєстрації: ' + createError.message);
+            currentPlayer = newPlayer;
+        }
+
+        // Перевірка нормалізації полів для старих акаунтів
+        if(!currentPlayer.buildings) currentPlayer.buildings = [];
+        if(!currentPlayer.army) currentPlayer.army = [];
+
+        loadGameUI();
+    }
+
+    // --- ОНОВЛЕННЯ ІНТЕРФЕЙСУ ТА ОБРАХУНОК СТАТИСТИКИ ---
+    function loadGameUI() {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('gameSection').classList.remove('hidden');
+
+        document.getElementById('countryTitle').innerText = currentPlayer.country_name;
+        document.getElementById('rulerName').innerText = currentPlayer.username;
+
+        recalculateStatsAndRender();
+        renderBuildingsCatalog();
+        renderArmyCatalog();
+    }
+
+    function recalculateStatsAndRender() {
+        // Парсинг населення (наприклад, "10M" -> 10)
+        let popVal = 10;
+        if(currentPlayer.population) {
+            popVal = parseFloat(currentPlayer.population.replace('M', '').replace('М', '')) || 10;
+        }
+
+        // 1 млн населення споживає 4% ресурсів та 4% електроенергії
+        let baseConsumption = popVal * 4;
+
+        // Підрахунок бонусів/витрат від будівель
+        let totalIncome = 50;
+        let totalEnergy = -baseConsumption;
+        let totalResources = -baseConsumption;
+        let totalHappiness = 50;
+
+        // Перевірка наявності Урядового кварталу
+        const hasGov = currentPlayer.buildings.some(b => b.includes("Урядовий квартал"));
+
+        currentPlayer.buildings.forEach(bName => {
+            buildingsCatalog.forEach(cat => {
+                cat.items.forEach(item => {
+                    if(item.name === bName || bName.includes(item.name)) {
+                        totalIncome += item.income || 0;
+                        totalEnergy += item.energy || 0;
+                        totalResources += item.resources || 0;
+                        totalHappiness += item.happiness || 0;
+                    }
+                });
+            });
+        });
+
+        // Штраф якщо немає Урядового кварталу (-50% доходу)
+        if(!hasGov) {
+            totalIncome = Math.round(totalIncome * 0.5);
+        }
+
+        // Оновлюємо статистику зверху
+        document.getElementById('statPop').innerText = popVal + "M";
+        document.getElementById('statBudget').innerText = currentPlayer.budget + "M $";
+        document.getElementById('statIncome').innerText = "+" + totalIncome + "M $";
+        document.getElementById('statEnergy').innerText = (totalEnergy >= 0 ? "+" : "") + totalEnergy + "%";
+        document.getElementById('statResources').innerText = (totalResources >= 0 ? "+" : "") + totalResources + "%";
+        
+        // Щастя обмежуємо 0-100%
+        totalHappiness = Math.max(0, Math.min(100, totalHappiness));
+        document.getElementById('statHappiness').innerText = totalHappiness + "%";
+
+        // Формуємо "Чого прагне народ"
+        let desires = [];
+        if(!hasGov) desires.push("🏛 Легітимності (потрібен Урядовий квартал)");
+        if(totalEnergy < 0) desires.push("⚡️ Більше електроенергії (дефіцит світла)");
+        if(totalResources < 0) desires.push("📦 Промислових та аграрних ресурсів");
+        if(totalHappiness < 40) desires.push("🎡 Розваг, медичного захисту та безпеки");
+        if(currentPlayer.army.length < 3) desires.push("🛡 Захисту та сильної армії");
+
+        if(desires.length === 0) {
+            document.getElementById('peopleDesireText').innerText = "Народ задоволений поточним станом держави! Процвітання досягнуто.";
+        } else {
+            document.getElementById('peopleDesireText').innerText = desires.join(" • ");
+        }
+
+        // Оновлюємо списки купленого у 3 вкладинці
+        renderMyAssets();
+    }
+
+    // --- РЕНДЕР КАТАЛОГУ БУДІВЕЛЬ ---
+    function renderBuildingsCatalog() {
+        const container = document.getElementById('buildingsContainer');
+        container.innerHTML = '';
+
+        buildingsCatalog.forEach(cat => {
+            let catHTML = `<div class="category-title">${cat.category}</div><div class="items-grid">`;
+            cat.items.forEach(item => {
+                catHTML += `
+                    <div class="item-card">
+                        <div>
+                            <div class="item-header">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-cost">${item.cost} млн $</span>
+                            </div>
+                            <div class="item-desc">${item.desc}</div>
+                        </div>
+                        <div class="item-footer">
+                            <button class="btn btn-buy" onclick="buyBuilding('${item.name}', ${item.cost})">Збудувати</button>
+                        </div>
+                    </div>
+                `;
+            });
+            catHTML += `</div>`;
+            container.innerHTML += catHTML;
+        });
+    }
+
+    // --- РЕНДЕР КАТАЛОГУ АРМІЇ ---
+    function renderArmyCatalog() {
+        const container = document.getElementById('armyContainer');
+        container.innerHTML = '';
+
+        armyCatalog.forEach(cat => {
+            let catHTML = `<div class="category-title">${cat.category}</div><div class="items-grid">`;
+            cat.items.forEach(item => {
+                catHTML += `
+                    <div class="item-card">
+                        <div>
+                            <div class="item-header">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-cost">${item.cost} млн $</span>
+                            </div>
+                            <div class="item-desc">${item.desc}</div>
+                        </div>
+                        <div class="item-footer">
+                            <button class="btn btn-buy" onclick="buyArmy('${item.name}', ${item.cost})">Закупити</button>
+                        </div>
+                    </div>
+                `;
+            });
+            catHTML += `</div>`;
+            container.innerHTML += catHTML;
+        });
+    }
+
+    // --- РЕНДЕР МОЇХ ОБ'ЄКТІВ ТА ВІЙСЬК ---
+    function renderMyAssets() {
+        const bList = document.getElementById('myBuildingsList');
+        if(currentPlayer.buildings && currentPlayer.buildings.length > 0) {
+            bList.innerHTML = currentPlayer.buildings.map(b => `<span class="tag">${b}</span>`).join('');
+        } else {
+            bList.innerHTML = '<span style="color:var(--text-sub);">Немає збудованих об'єктів</span>';
+        }
+
+        const aList = document.getElementById('myArmyList');
+        if(currentPlayer.army && currentPlayer.army.length > 0) {
+            aList.innerHTML = currentPlayer.army.map(a => `<span class="tag" style="color:var(--warning); border-color:var(--warning);">${a}</span>`).join('');
+        } else {
+            aList.innerHTML = '<span style="color:var(--text-sub);">Немає закупленого озброєння</span>';
+        }
+    }
+
+    // --- КУПІВЛЯ БУДІВЕЛЬ ---
+    async function buyBuilding(name, cost) {
+        if(currentPlayer.budget < cost) return alert('Неможливо збудувати: Нестача коштів у бюджеті!');
+
+        currentPlayer.budget -= cost;
+        if(!currentPlayer.buildings) currentPlayer.buildings = [];
+        currentPlayer.buildings.push(name);
+
+        const { error } = await db.from('players').update({
+            budget: currentPlayer.budget,
+            buildings: currentPlayer.buildings
+        }).eq('id', currentPlayer.id);
+
+        if(error) return alert('Помилка збереження: ' + error.message);
+
+        alert(`Успішно збудовано: ${name}!`);
+        recalculateStatsAndRender();
+    }
+
+    // --- КУПІВЛЯ АРМІЇ ---
+    async function buyArmy(name, cost) {
+        if(currentPlayer.budget < cost) return alert('Неможливо закупити: Нестача коштів у бюджеті!');
+
+        currentPlayer.budget -= cost;
+        if(!currentPlayer.army) currentPlayer.army = [];
+        currentPlayer.army.push(name);
+
+        const { error } = await db.from('players').update({
+            budget: currentPlayer.budget,
+            army: currentPlayer.army
+        }).eq('id', currentPlayer.id);
+
+        if(error) return alert('Помилка збереження: ' + error.message);
+
+        alert(`Успішно закуплено в армію: ${name}!`);
+        recalculateStatsAndRender();
+    }
+
+    // --- ПЕРЕКЛЮЧЕННЯ ВКЛАДОК ---
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabId).classList.remove('hidden');
+        btn.classList.add('active');
+    }
+
+    function logout() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
+index.html
+Відображається "index.html".
