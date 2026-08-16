@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Geopolitics RP 2026</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid transparent;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            border-color: var(--accent);
+            background-color: #334155;
+        }
+
+        .country-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .title {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .stat-box .value {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-green { background-color: var(--success); color: white; }
+        .btn-red { background-color: var(--danger); color: white; }
+
+        .shop-section {
+            margin-top: 20px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .item-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .item-title { font-weight: bold; font-size: 1.1em; }
+        .item-details { color: var(--text-secondary); font-size: 0.9em; margin: 10px 0; }
+
+        .log-box {
+            background-color: #000;
+            color: #00ff66;
+            font-family: monospace;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌍 GLOBAL GEOPOLITICS RP</h1>
+
+    <div class="tabs" id="tabsContainer"></div>
+
+    <div class="country-card" id="countryCard">
+        <!-- Дані країни завантажуються скріптом -->
+    </div>
+
+    <div class="country-card shop-section">
+        <h3>🛍️ Магазин Інфраструктури та Будівель</h3>
+        <div class="shop-grid" id="shopGrid"></div>
+    </div>
+
+    <div class="log-box" id="logBox">
+        <button class="copy-btn" onclick="copyLog()">📋 Скопіювати для ТГ</button>
+        <div id="logText">Текст для Telegram з'явиться тут після дій...</div>
+    </div>
+</div>
+
+<script>
+    const buildings = [
+        { name: "🏛️ Урядовий квартал", cost: 500, income: 0, energy: -20, legit: true, happy: 2 },
+        { name: "🛍️ Торговий центр (ТЦ)", cost: 180, income: 70, energy: -15, happy: 0 },
+        { name: "🍔 Мережа Фастфуду", cost: 90, income: 40, energy: -3, happy: 0 },
+        { name: "🌾 Агрокомплекс", cost: 96, income: 0, energy: 0, happy: 0 },
+        { name: "🌬️ ВЕС (Вітряки)", cost: 106, income: 0, energy: 8, happy: 0 },
+        { name: "⚡️ АЕС (Ядерна станція)", cost: 450, income: 0, energy: 70, happy: 0 }
+    ];
+
+    const initialData = {
+        france: { name: "🇫🇷 Франція", budget: 131, income: 81, energy: -59, pop: "41M", legit: true, happy: 52, buildings: ["🏛️ Урядовий квартал", "⚡️ АЕС", "🌬️ ВЕС"] },
+        uk: { name: "🇬🇧 Велика Британія", budget: 533, income: 149, energy: -171, pop: "44.1M", legit: true, happy: 52, buildings: ["⚡️ ТЕС", "🍔 Фастфуд", "🪖 Казарма", "🏛️ Урядовий квартал"] },
+        brazil: { name: "🇧🇷 Бразилія", budget: 255, income: 175, energy: -393, pop: "93M", legit: true, happy: 52, buildings: ["🏛️ Урядовий квартал", "🛍️ ТЦ", "🍔 Фастфуд", "🏭 Завод", "🌾 Агрокомплекс"] },
+        panama: { name: "🇵🇦 Панама", budget: 218, income: 100, energy: -27, pop: "4.5M", legit: true, happy: 52, buildings: ["🏛️ Урядовий квартал", "🛍️ ТЦ", "🌬️ ВЕС", "🌾 Агрокомплекс"] }
+    };
+
+    let gameData = JSON.parse(localStorage.getItem('rp_game_data')) || initialData;
+    let currentKey = 'panama';
+
+    function saveData() {
+        localStorage.setItem('rp_game_data', JSON.stringify(gameData));
+    }
+
+    function renderTabs() {
+        const tabsContainer = document.getElementById('tabsContainer');
+        tabsContainer.innerHTML = '';
+        Object.keys(gameData).forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${key === currentKey ? 'active' : ''}`;
+            btn.innerText = gameData[key].name;
+            btn.onclick = () => { currentKey = key; render(); };
+            tabsContainer.appendChild(btn);
+        });
+    }
+
+    function renderCountry() {
+        const c = gameData[currentKey];
+        const card = document.getElementById('countryCard');
+        card.innerHTML = `
+            <h2>${c.name}</h2>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="title">Бюджет</div><div class="value">${c.budget} млн $</div></div>
+                <div class="stat-box"><div class="title">Щоденний Дохід</div><div class="value">+${c.income} млн $/день</div></div>
+                <div class="stat-box"><div class="title">Енергобаланс</div><div class="value">${c.energy}%</div></div>
+                <div class="stat-box"><div class="title">Легітимність</div><div class="value">${c.legit ? '✅ Встановлена' : '❌ Відсутня'}</div></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-green" onclick="addDailyIncome()">💵 Нарахувати дохід (+1 день)</button>
+                <button class="btn btn-red" onclick="resetCountryData()">🔄 Скинути до початкових</button>
+            </div>
+            <p><strong>Будівлі:</strong> ${c.buildings.join(', ') || 'Немає будівель'}</p>
+        `;
+    }
+
+    function renderShop() {
+        const grid = document.getElementById('shopGrid');
+        grid.innerHTML = '';
+        buildings.forEach(b => {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `
+                <div>
+                    <div class="item-title">${b.name}</div>
+                    <div class="item-details">
+                        Ціна: <b>${b.cost} млн $</b><br>
+                        Дохід: +${b.income} млн/день<br>
+                        Енергія: ${b.energy > 0 ? '+' : ''}${b.energy}%
+                    </div>
+                </div>
+                <button class="btn" onclick="buyBuilding('${b.name}', ${b.cost}, ${b.income}, ${b.energy}, ${b.legit || false}, ${b.happy || 0})">Купити</button>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
+    function buyBuilding(name, cost, income, energy, legit, happy) {
+        const c = gameData[currentKey];
+        if (c.budget < cost) {
+            alert('Нестача коштів у бюджеті!');
+            return;
+        }
+        c.budget -= cost;
+        c.income += income;
+        c.energy += energy;
+        if (legit) c.legit = true;
+        if (happy) c.happy += happy;
+        c.buildings.push(name);
+
+        saveData();
+        render();
+        generateTGLog(`Придбано об'єкт: ${name} за $${cost}M.`);
+    }
+
+    function addDailyIncome() {
+        const c = gameData[currentKey];
+        c.budget += c.income;
+        saveData();
+        render();
+        generateTGLog(`Нараховано щоденний дохід: +$${c.income}M.`);
+    }
+
+    function resetCountryData() {
+        if(confirm("Скинути дані цієї країни?")) {
+            gameData[currentKey] = JSON.parse(JSON.stringify(initialData[currentKey]));
+            saveData();
+            render();
+        }
+    }
+
+    function generateTGLog(actionText) {
+        const c = gameData[currentKey];
+        const log = `${c.name}
+Останній запис: ${actionText}
+
+💰 Бюджет: ${c.budget},000,000 $
+💵 Щоденний дохід: +${c.income} млн $ / день
+⚡️ Споживання енергії: ${c.energy}%
+⚠️ Легітимність: ${c.legit ? '✅ Так' : '❌ Ні'}
+🏛 Будівлі: ${c.buildings.join(', ')}`;
+        document.getElementById('logText').innerText = log;
+    }
+
+    function copyLog() {
+        const text = document.getElementById('logText').innerText;
+        navigator.clipboard.writeText(text);
+        alert("Текст скопійовано для Telegram!");
+    }
+
+    function render() {
+        renderTabs();
+        renderCountry();
+        renderShop();
+    }
+
+    render();
+</script>
+
+</body>
+</html>
