@@ -151,40 +151,46 @@
     let currentCategory = 'extract';
 
     const buildingCatalog = [
-        // ВИДОБУТОК ТА ПРОМИСЛОВІСТЬ (НПЗ, ШАХТИ)
         { cat: 'extract', name: "🛢 Нафтопереробний завод (НПЗ)", cost: 650, income: 80, oil: 50, ore: 0, energy: -20, desc: "Дає +50 нафти/день та +80 млн $ доходу" },
         { cat: 'extract', name: "⛏ Вугільна/Залізна Шахта", cost: 400, income: 45, oil: 0, ore: 60, energy: -15, desc: "Дає +60 руди/день" },
         { cat: 'extract', name: "🏗 Нафтова вишка", cost: 500, income: 60, oil: 40, ore: 0, energy: -10, desc: "+40 нафти/день" },
 
-        // ЕНЕРГЕТИКА
         { cat: 'energy', name: "⚡️ АЕС", cost: 764, income: 0, oil: 0, ore: 0, energy: 25, desc: "+25% Ел-енергії" },
         { cat: 'energy', name: "💧 ГЕС", cost: 392, income: 0, oil: 0, ore: 0, energy: 15, desc: "+15% Ел-енергії" },
         { cat: 'energy', name: "🔥 ТЕС", cost: 274, income: 0, oil: -10, ore: 0, energy: 18, desc: "+18% Ел-енергії (споживає нафту)" },
 
-        // УПРАВЛІННЯ
         { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, income: 0, oil: 0, ore: 0, energy: -20, desc: "Центр управління державою" },
         { cat: 'gov', name: "🛂 Митний термінал", cost: 600, income: 50, oil: 0, ore: 0, energy: 0, desc: "+50 млн $ від торгівлі" },
 
-        // ЛОГІСТИКА
         { cat: 'logistics', name: "🛳 Морський порт", cost: 800, income: 100, oil: 0, ore: 0, energy: -20, desc: "+100 млн $ міжнародної торгівлі" }
     ];
 
-    window.onload = async () => {
-        loadCountriesList();
-    };
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadCountriesList();
+    });
 
     async function loadCountriesList() {
-        const { data } = await db.from('real_countries').select('*');
         const select = document.getElementById('countrySelect');
         const msgSelect = document.getElementById('msgReceiver');
-        select.innerHTML = '';
-        msgSelect.innerHTML = '';
 
-        if(data) {
+        try {
+            const { data, error } = await db.from('real_countries').select('*');
+            select.innerHTML = '';
+            msgSelect.innerHTML = '';
+
+            if (error || !data || data.length === 0) {
+                select.innerHTML = '<option value="Україна">Україна</option><option value="США">США</option><option value="Німеччина">Німеччина</option><option value="Польща">Польща</option>';
+                msgSelect.innerHTML = select.innerHTML;
+                return;
+            }
+
             data.forEach(c => {
                 select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
                 msgSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
             });
+        } catch (err) {
+            select.innerHTML = '<option value="Україна">Україна</option><option value="США">США</option>';
+            msgSelect.innerHTML = select.innerHTML;
         }
     }
 
@@ -206,10 +212,16 @@
                 password: pass,
                 country_name: country,
                 real_country: country,
+                budget: 1000,
+                income: 100,
+                oil: 100,
+                ore: 100,
+                energy: 50,
+                happiness: 75,
                 buildings: ["🏛 Урядовий квартал"]
             }]).select().single();
 
-            if(error) return alert('Помилка: Країна вже зайнята або помилка баз даних.');
+            if(error) return alert('Помилка реєстрації. Спробуйте інший логін.');
             currentPlayer = newPlayer;
         }
 
@@ -220,14 +232,14 @@
         document.getElementById('authSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('hidden');
 
-        document.getElementById('countryTitle').innerText = currentPlayer.country_name;
-        document.getElementById('rulerName').innerText = currentPlayer.username;
-        document.getElementById('statBudget').innerText = currentPlayer.budget;
-        document.getElementById('statIncome').innerText = '+' + currentPlayer.income;
-        document.getElementById('statOil').innerText = currentPlayer.oil || 0;
-        document.getElementById('statOre').innerText = currentPlayer.ore || 0;
-        document.getElementById('statEnergy').innerText = currentPlayer.energy + '%';
-        document.getElementById('statHappiness').innerText = currentPlayer.happiness + '%';
+        document.getElementById('countryTitle').innerText = currentPlayer.country_name || 'Держава';
+        document.getElementById('rulerName').innerText = currentPlayer.username || 'Правитель';
+        document.getElementById('statBudget').innerText = currentPlayer.budget ?? 1000;
+        document.getElementById('statIncome').innerText = '+' + (currentPlayer.income ?? 100);
+        document.getElementById('statOil').innerText = currentPlayer.oil ?? 100;
+        document.getElementById('statOre').innerText = currentPlayer.ore ?? 100;
+        document.getElementById('statEnergy').innerText = (currentPlayer.energy ?? 50) + '%';
+        document.getElementById('statHappiness').innerText = (currentPlayer.happiness ?? 75) + '%';
         
         document.getElementById('buildingsList').innerText = currentPlayer.buildings ? currentPlayer.buildings.join(', ') : 'Немає';
 
@@ -278,11 +290,11 @@
     }
 
     async function buyBuilding(name, cost, income, energy, oil, ore) {
-        if(currentPlayer.budget < cost) return alert('Нестача бюджету!');
+        if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету!');
 
         currentPlayer.budget -= cost;
-        currentPlayer.income += income;
-        currentPlayer.energy += energy;
+        currentPlayer.income = (currentPlayer.income || 0) + income;
+        currentPlayer.energy = (currentPlayer.energy || 0) + energy;
         currentPlayer.oil = (currentPlayer.oil || 0) + oil;
         currentPlayer.ore = (currentPlayer.ore || 0) + ore;
         if(!currentPlayer.buildings) currentPlayer.buildings = [];
@@ -301,7 +313,6 @@
         loadGameUI();
     }
 
-    // 💰 РИНОК
     async function createOffer() {
         const type = document.getElementById('sellType').value;
         const amount = parseInt(document.getElementById('sellAmount').value);
@@ -349,29 +360,25 @@
     }
 
     async function buyOffer(offerId, sellerId, type, amount, totalCost) {
-        if(currentPlayer.budget < totalCost) return alert('Нестача коштів у бюджеті!');
+        if((currentPlayer.budget || 0) < totalCost) return alert('Нестача коштів у бюджеті!');
 
         currentPlayer.budget -= totalCost;
         if(type === 'oil') currentPlayer.oil = (currentPlayer.oil || 0) + amount;
         if(type === 'ore') currentPlayer.ore = (currentPlayer.ore || 0) + amount;
 
-        // Оновлюємо покупця
         await db.from('players').update({ budget: currentPlayer.budget, oil: currentPlayer.oil, ore: currentPlayer.ore }).eq('id', currentPlayer.id);
 
-        // Оновлюємо продавця (додаємо йому гроші)
         const { data: seller } = await db.from('players').select('*').eq('id', sellerId).single();
         if(seller) {
-            await db.from('players').update({ budget: seller.budget + totalCost }).eq('id', sellerId);
+            await db.from('players').update({ budget: (seller.budget || 0) + totalCost }).eq('id', sellerId);
         }
 
-        // Видаляємо лот з ринку
         await db.from('market_offers').delete().eq('id', offerId);
 
         alert('Успішна покупка!');
         loadGameUI();
     }
 
-    // 🤝 ДИПЛОМАТІЯ
     async function sendMessage() {
         const receiver = document.getElementById('msgReceiver').value;
         const text = document.getElementById('msgText').value.trim();
