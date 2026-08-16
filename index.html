@@ -6,9 +6,9 @@
     <title>Global Geopolitics RP 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #22c55e; --danger: #ef4444; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1150px; margin: 0 auto; }
         .card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         .form-group { margin-bottom: 15px; }
         input, select, textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
@@ -16,19 +16,23 @@
         .btn:hover { opacity: 0.9; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 15px; }
         .stat-box { background: #0f172a; padding: 12px; border-radius: 8px; text-align: center; }
         
         .main-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .nav-btn { flex: 1; min-width: 140px; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; text-align: center; }
+        .nav-btn { flex: 1; min-width: 130px; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; text-align: center; }
         .nav-btn.active { background: var(--accent); color: #0f172a; }
 
         .category-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
         .cat-btn { background: #0f172a; border: 1px solid #334155; color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .cat-btn.active { background: var(--accent); color: #0f172a; }
 
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .shop-grid, .province-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .item-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em; }
+        .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .status-success { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+        
         .hidden { display: none; }
         .chat-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
         .msg { border-bottom: 1px solid #334155; padding: 8px 0; }
@@ -52,7 +56,11 @@
         <div class="form-group">
             <label>Оберіть Державу:</label>
             <select id="countrySelect">
-                <option value="">Завантаження списку країн...</option>
+                <option value="Німеччина">🇩🇪 Німеччина</option>
+                <option value="Україна">🇺🇦 Україна</option>
+                <option value="США">🇺🇸 США</option>
+                <option value="Франція">🇫🇷 Франція</option>
+                <option value="Велика Британія">🇬🇧 Велика Британія</option>
             </select>
         </div>
         <button class="btn" onclick="loginOrRegister()">Увійти / Отримати контроль над державою</button>
@@ -64,6 +72,7 @@
         <!-- НАВІГАЦІЯ -->
         <div class="main-nav">
             <div class="nav-btn active" onclick="showTab('dashboard', this)">📊 Статистика</div>
+            <div class="nav-btn" onclick="showTab('provinces', this)">🗺 Провінції</div>
             <div class="nav-btn" onclick="showTab('build', this)">🏗 Будівництво</div>
             <div class="nav-btn" onclick="showTab('army', this)">🪖 Армія та Оборона</div>
             <div class="nav-btn" onclick="showTab('market', this)">💰 Ринок</div>
@@ -78,24 +87,36 @@
             </div>
             <p>Правитель: <b id="rulerName" style="color: var(--accent);"></b></p>
 
-            <h3>📈 Повна Статистика Держави:</h3>
+            <h3>⚠️ ПОТОЧНИЙ СТАТУС ДЕРЖАВИ:</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+                <div>Легітимність: <span id="statusLegitimacy" class="status-badge status-danger">❌ Ні (Потрібно Урядовий квартал)</span></div>
+                <div>Зв'язок / IT: <span id="statusNet" class="status-badge status-danger">❌ Немає 4G/5G</span></div>
+            </div>
+
+            <h3>📈 Повна Статистика:</h3>
             <div class="stats-grid">
-                <div class="stat-box">Бюджет<br><b id="statBudget" style="font-size: 1.2em; color: var(--success);">0</b> млн $</div>
-                <div class="stat-box">Дохід/день<br><b id="statIncome" style="font-size: 1.2em;">+0</b> млн $</div>
-                <div class="stat-box">🛢 Нафта<br><b id="statOil" style="font-size: 1.2em;">0</b> бар.</div>
-                <div class="stat-box">⛏ Руда/Ресурси<br><b id="statOre" style="font-size: 1.2em;">0</b> т.</div>
-                <div class="stat-box">Енергобаланс<br><b id="statEnergy">0%</b></div>
-                <div class="stat-box">Щастя Населення<br><b id="statHappiness">50%</b></div>
-                <div class="stat-box">⚔️ Військова Сила<br><b id="statMilitaryPower" style="color: var(--danger);">0</b></div>
+                <div class="stat-box">Бюджет<br><b id="statBudget" style="font-size: 1.1em; color: var(--success);">0 $</b></div>
+                <div class="stat-box">Загальне Населення<br><b id="statPopulation" style="font-size: 1.1em;">0 млн</b></div>
+                <div class="stat-box">Базовий Дохід<br><b id="statIncome" style="font-size: 1.1em;">+0 млн $ / день</b></div>
+                <div class="stat-box">Споживання Енергії<br><b id="statEnergy" style="color:var(--danger); font-size: 1.1em;">0%</b></div>
+                <div class="stat-box">🛢 Нафта / Паливо<br><b id="statOil" style="font-size: 1.1em;">0 л / день</b></div>
+                <div class="stat-box">⛏ Шахти / Склади<br><b id="statMines" style="font-size: 1.1em;">0 / 0</b></div>
+                <div class="stat-box">🎖 Гарнізон / Армія<br><b id="statMilitaryPower" style="color: var(--danger); font-size: 1.1em;">0</b></div>
             </div>
 
             <h4 style="margin-top:20px;">🏛 Побудовані Об'єкти:</h4>
-            <p id="buildingsList">Завантаження...</p>
+            <p id="buildingsList">Порожньо</p>
             <h4>🪖 Наявне Озброєння та Війська:</h4>
-            <p id="armyList">Немає сформованих підрозділів.</p>
+            <p id="armyList">35,000 осіб (базовий гарнізон)</p>
         </div>
 
-        <!-- ВКЛАДКА 2: БУДІВНИЦТВО (ПОВНИЙ РЕЄСТР) -->
+        <!-- ВКЛАДКА 2: ПРОВІНЦІЇ (ЗЕМЛІ) -->
+        <div id="tabProvinces" class="card hidden">
+            <h3>🗺 Провінції та Землі Держави</h3>
+            <div class="province-grid" id="provincesGrid">Завантаження провінцій...</div>
+        </div>
+
+        <!-- ВКЛАДКА 3: БУДІВНИЦТВО -->
         <div id="tabBuild" class="card hidden">
             <h3>🏗 Повний Реєстр Державних Об'єктів</h3>
             <div class="category-bar">
@@ -112,7 +133,7 @@
             <div class="shop-grid" id="shopGrid"></div>
         </div>
 
-        <!-- ВКЛАДКА 3: АРМІЯ ТА ОБОРОНА -->
+        <!-- ВКЛАДКА 4: АРМІЯ ТА ОБОРОНА -->
         <div id="tabArmy" class="card hidden">
             <h3>🪖 Реєстр Озброєння та Військової Техніки</h3>
             <div class="category-bar">
@@ -129,7 +150,7 @@
             <div class="shop-grid" id="armyGrid"></div>
         </div>
 
-        <!-- ВКЛАДКА 4: РИНОК -->
+        <!-- ВКЛАДКА 5: РИНОК -->
         <div id="tabMarket" class="card hidden">
             <h3>💰 Державний Ринок</h3>
             <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -148,7 +169,7 @@
             <div id="marketList">Завантаження лотів...</div>
         </div>
 
-        <!-- ВКЛАДКА 5: ДИПЛОМАТІЯ -->
+        <!-- ВКЛАДКА 6: ДИПЛОМАТІЯ -->
         <div id="tabDiplomacy" class="card hidden">
             <h3>🤝 Дипломатичний Зв'язок</h3>
             <div class="chat-box" id="chatBox">Завантаження повідомлень...</div>
@@ -174,147 +195,91 @@
     let currentCategory = 'energy';
     let currentArmyCat = 'infantry';
 
-    // РЕЄСТР БУДІВЕЛЬ
+    // ДЕФОЛТНІ СТАТИСТИКИ КРАЇН (Наприклад: Німеччина)
+    const countryPresets = {
+        "Німеччина": {
+            budget: 1085000000,
+            population: 43,
+            income: 85,
+            energy_consumption: -172,
+            garrison: "35,000 осіб",
+            oil: 0,
+            mines: 0,
+            warehouses: 0,
+            legitimacy: false,
+            has_net: false,
+            provinces: [
+                { name: "🍺 Баварія", pop: 13, income: 35, energy: -52, buildings: "Порожньо" },
+                { name: "🏭 Північний Рейн-Вестфалія", pop: 12, income: 30, energy: -48, buildings: "Порожньо" },
+                { name: "🥨 Баден-Вюртемберг", pop: 8, income: 15, energy: -32, buildings: "Порожньо" },
+                { name: "🏰 Нижня Саксонія", pop: 6, income: 5, energy: -24, buildings: "Порожньо" },
+                { name: "🐻 Берлін (столичний округ)", pop: 4, income: 0, energy: -16, buildings: "Порожньо" }
+            ]
+        }
+    };
+
+    // БУДІВНИЦТВО
     const buildingCatalog = [
-        // Енергетика
         { cat: 'energy', name: "АЕС", cost: 764, desc: "+25% Ел-енергії, -10% ресурсів, -10% Щастя" },
         { cat: 'energy', name: "ГЕС", cost: 392, desc: "+15% Ел-енергії, -5% ресурсів" },
         { cat: 'energy', name: "ТЕС", cost: 274, desc: "+18% Ел-енергії, -10% ресурсів" },
         { cat: 'energy', name: "ВЕС", cost: 106, desc: "+8% Ел-енергії, -5% ресурсів" },
         { cat: 'energy', name: "ЛЕП (Мережа)", cost: 204, desc: "Пропускна здатність електромереж" },
 
-        // Управління та Безпека
-        { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, desc: "Дозволяє видавати закони. Усуває штраф -50% доходу." },
+        { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, desc: "Дозволяє видавати закони. Надає Легітимність!" },
         { cat: 'gov', name: "🛂 Митний термінал", cost: 600, desc: "Дає 5% від міжнародних торгових угод." },
         { cat: 'gov', name: "🚔 Поліцейський департамент", cost: 180, desc: "Захист від бунтів при низькому щасті." },
         { cat: 'gov', name: "🕵️ Штаб Розвідки", cost: 500, desc: "Шпигунство, збір даних та диверсії." },
 
-        // Логістика
         { cat: 'logistics', name: "🏭 Логістичний хаб", cost: 420, desc: "+30% до ліміту доставок матеріалів." },
         { cat: 'logistics', name: "📦 Поштова мережа", cost: 180, desc: "+15% доходу пошти, +5% Щастя." },
         { cat: 'logistics', name: "🚛 Автопарк (Депо)", cost: 280, desc: "-20% споживання палива транспортом." },
         { cat: 'logistics', name: "🛳 Морський порт", cost: 800, desc: "+100% ліміт торгівлі, обслуговування флоту." },
 
-        // Зв'язок
         { cat: 'comm', name: "🗼 Вишка 3G", cost: 150, desc: "Базовий зв'язок та дзвінки." },
         { cat: 'comm', name: "📡 Вишка 4G", cost: 300, desc: "Онлайн-банкінг та цифрова логістика." },
         { cat: 'comm', name: "⚡️ Вишка 5G", cost: 650, desc: "+25% прибутку IT-сектору." },
         { cat: 'comm', name: "🖥 Серверний Центр", cost: 520, desc: "Необхідний для функціонування IT." },
 
-        // Паливо
         { cat: 'fuel', name: "⛽️ Мережа АЗС", cost: 450, desc: "Забезпечує паливом транспорт та армію." },
         { cat: 'fuel', name: "🔌 Зарядні станції Electro-Charge", cost: 380, desc: "Живлення електранспорту та 5G." },
         { cat: 'fuel', name: "🛢 Нафтова установка (LVL 1)", cost: 588, desc: "Видобуток сирої нафти." },
         { cat: 'fuel', name: "🏭 НПЗ (Рівень 1)", cost: 536, desc: "Переробка нафти в паливо." },
 
-        // Виробництво & Агро
         { cat: 'prod', name: "🏭 Завод", cost: 48, desc: "+15% ресурсів, -5% е-енергії" },
         { cat: 'prod', name: "🌾 Агрокомплекс", cost: 96, desc: "+25% ресурсів, -15% е-енергії" },
         { cat: 'prod', name: "🚜 Ферма", cost: 180, desc: "+40% ресурсів, -25% е-енергії" },
         { cat: 'prod', name: "🧪 Хімічний Комбінат", cost: 450, desc: "+20% ресурси, -15% Енергія, -15% Щастя" },
         { cat: 'prod', name: "🛤 Залізничний Вузол", cost: 350, desc: "-50% споживання палива регіоном." },
 
-        // Бізнес
         { cat: 'biz', name: "🛍 ТЦ (Торговий центр)", cost: 180, desc: "+70 млн дохід/день" },
         { cat: 'biz', name: "🍔 Мережа фастфуду", cost: 96, desc: "+40 млн дохід/день" },
         { cat: 'biz', name: "🏨 Готель", cost: 120, desc: "+60 млн дохід/день" },
-        { cat: 'biz', name: "🏦 Центральний Банк", cost: 950, desc: "Кредити та власна валюта (без нього комісія 10%)." },
+        { cat: 'biz', name: "🏦 Центральний Банк", cost: 950, desc: "Кредити та власна валюта." },
         { cat: 'biz', name: "🎓 Науковий Центр / Університет", cost: 350, desc: "+10% ефективність IT та заводів." },
 
-        // Соціальні
         { cat: 'social', name: "🎡 Центр Громади", cost: 320, desc: "Щастя +15%, захист від міграції." },
         { cat: 'social', name: "🏥 Центральна Лікарня", cost: 250, desc: "+10% Щастя, -15% втрат у війні." },
 
-        // Шахти
         { cat: 'mines', name: "🪵 Вугільна Шахта", cost: 520, desc: "Видобуток вугілля" },
         { cat: 'mines', name: "🪙 Залізна Шахта", cost: 780, desc: "Видобуток заліза" },
         { cat: 'mines', name: "🪙 Золота Шахта", cost: 1420, desc: "Видобуток золота" },
         { cat: 'mines', name: "💎 Титанова Шахта", cost: 1840, desc: "Видобуток титану" }
     ];
 
-    // РЕЄСТР ВІЙСЬКОВОЇ ТЕХНІКИ
+    // АРМІЯ
     const armyCatalog = [
-        // Піхота
         { cat: 'infantry', name: "Сухопутні війська (1к)", cost: 3, power: 3, desc: "Базова піхота" },
         { cat: 'infantry', name: "Морська піхота (1к)", cost: 5, power: 5, desc: "Ефективні при штурмі портів" },
         { cat: 'infantry', name: "ССО (1к)", cost: 15, power: 12, desc: "Диверсії на заводах ворога" },
-
-        // Бронетехніка
-        { cat: 'armor', name: "Abrams (США)", cost: 35, power: 7, desc: "+2 до виживання при ПТРК" },
         { cat: 'armor', name: "Leopard 2 (Німеччина)", cost: 35, power: 6, desc: "Швидкий ремонт (-10% ціни)" },
-        { cat: 'armor', name: "Leclerc (Франція)", cost: 33, power: 6, desc: "Шанс ухилення від артилерії" },
-        { cat: 'armor', name: "K2 Panther (Пд. Корея)", cost: 34, power: 6, desc: "Сучасний основний танк" },
-        { cat: 'armor', name: "Bradley (США)", cost: 16, power: 3, desc: "Знищує БМП ворога 1 до 2" },
-        { cat: 'armor', name: "БМП-3", cost: 13, power: 2, desc: "Легка бронетехніка" },
-        { cat: 'armor', name: "БТР-4 «Буцефал» (Україна)", cost: 12, power: 3, desc: "Швидкий бронетранспортер" },
-
-        // Артилерія
-        { cat: 'artillery', name: "M142 HIMARS (США)", cost: 180, power: 45, desc: "Знищує склади та штаби з 100% точністю" },
-        { cat: 'artillery', name: "PzH 2000 (Німеччина)", cost: 45, power: 15, desc: "Дальнобійність без відповіді піхоти" },
-        { cat: 'artillery', name: "САУ Богдана (Україна)", cost: 30, power: 12, desc: "155-мм самохідна гаубиця" },
-
-        // Гелікоптери
-        { cat: 'heli', name: "Apache (США)", cost: 64, power: 8, desc: "Ударний гелікоптер" },
-        { cat: 'heli', name: "Ка-52 «Алігатор»", cost: 60, power: 7, desc: "Ударний гелікоптер" },
-        { cat: 'heli', name: "Tiger (Німеччина)", cost: 68, power: 3, desc: "Розвідка (відкриває 100% сил ворога)" },
-
-        // Авіація
-        { cat: 'air', name: "F-16 (США)", cost: 162, power: 30, desc: "Багатоцільовий винищувач" },
-        { cat: 'air', name: "F-22 Raptor (США)", cost: 300, power: 60, desc: "Невидимий для ППО С-300" },
-        { cat: 'air', name: "Су-27 (Україна)", cost: 125, power: 25, desc: "Винищувач завоювання переваги" },
-        { cat: 'air', name: "Bayraktar TB2 (Туреччина)", cost: 40, power: 10, desc: "Ударний БПЛА" },
-        { cat: 'air', name: "Дрон-камікадзе", cost: 15, power: 5, desc: "Одноразовий удар по енергетиці" },
-
-        // ППО
-        { cat: 'airdef', name: "Patriot (США)", cost: 1000, power: 100, desc: "Збиває Балістику (Шанс 70%)" },
-        { cat: 'airdef', name: "SAMP/T", cost: 750, power: 80, desc: "Збиває всі типи цілей" },
-        { cat: 'airdef', name: "NASAMS", cost: 550, power: 50, desc: "Збиває Крилаті ракети" },
-        { cat: 'airdef', name: "С-300", cost: 320, power: 30, desc: "Протиповітряна оборона" },
-
-        // Флот
-        { cat: 'navy', name: "Тикондерога (США)", cost: 2000, power: 180, desc: "Ракетний крейсер" },
-        { cat: 'navy', name: "Кіров", cost: 2200, power: 200, desc: "Важкий атомний крейсер" },
-        { cat: 'navy', name: "Arleigh Burke (США)", cost: 1800, power: 160, desc: "Ескадрений міноносець" },
-        { cat: 'navy', name: "Type 45 (Британія)", cost: 1300, power: 140, desc: "Есмінець КР" },
-        { cat: 'navy', name: "Virginia (США)", cost: 2500, power: 220, desc: "Атомний підводний човен" },
-
-        // Ракети
-        { cat: 'rockets', name: "Крилата ракета", cost: 70, power: 35, desc: "Ціль: Будівлі та Заводи" },
-        { cat: 'rockets', name: "Балістична ракета", cost: 200, power: 90, desc: "Ціль: Штаби та ППО" },
-        { cat: 'rockets', name: "Морська ракета", cost: 50, power: 25, desc: "Ціль: Кораблі" },
-
-        // Спецслужби
-        { cat: 'spec', name: "ТЦК (Мобілізація)", cost: 10, power: 0, desc: "Шанс +100-700 рекрутів/день" },
-        { cat: 'spec', name: "СБУ (Контррозвідка)", cost: 70, power: 0, desc: "Приховує статистику країни" },
-        { cat: 'spec', name: "ГУР (Розвідка)", cost: 120, power: 0, desc: "Попередження про атаку за 12 годин" }
+        { cat: 'armor', name: "Abrams (США)", cost: 35, power: 7, desc: "+2 до виживання при ПТРК" },
+        { cat: 'artillery', name: "PzH 2000 (Німеччина)", cost: 45, power: 15, desc: "Дальнобійність" },
+        { cat: 'artillery', name: "M142 HIMARS (США)", cost: 180, power: 45, desc: "100% точність по штабах" },
+        { cat: 'heli', name: "Tiger (Німеччина)", cost: 68, power: 3, desc: "Розвідка" },
+        { cat: 'air', name: "F-16 (США)", cost: 162, power: 30, desc: "Винищувач" },
+        { cat: 'airdef', name: "Patriot (США)", cost: 1000, power: 100, desc: "Збиває Балістику" }
     ];
-
-    const defaultCountries = ["Україна", "США", "Німеччина", "Франція", "Велика Британія", "Польща", "Японія", "Південна Корея", "Канада", "Туреччина"];
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await loadCountriesList();
-    });
-
-    async function loadCountriesList() {
-        const select = document.getElementById('countrySelect');
-        const msgSelect = document.getElementById('msgReceiver');
-
-        try {
-            const { data } = await db.from('real_countries').select('*');
-            select.innerHTML = '';
-            msgSelect.innerHTML = '';
-
-            let list = (data && data.length > 0) ? data.map(c => c.name) : defaultCountries;
-
-            list.forEach(country => {
-                select.innerHTML += `<option value="${country}">${country}</option>`;
-                msgSelect.innerHTML += `<option value="${country}">${country}</option>`;
-            });
-        } catch (err) {
-            select.innerHTML = defaultCountries.map(c => `<option value="${c}">${c}</option>`).join('');
-            msgSelect.innerHTML = select.innerHTML;
-        }
-    }
 
     async function loginOrRegister() {
         const user = document.getElementById('usernameInput').value.trim();
@@ -329,18 +294,36 @@
             if(data.password !== pass) return alert('Невірний пароль!');
             currentPlayer = data;
         } else {
+            const preset = countryPresets[country] || {
+                budget: 1000000000,
+                population: 40,
+                income: 50,
+                energy_consumption: -100,
+                garrison: "20,000 осіб",
+                oil: 0,
+                mines: 0,
+                warehouses: 0,
+                legitimacy: false,
+                has_net: false,
+                provinces: []
+            };
+
             let { data: newPlayer, error } = await db.from('players').insert([{
                 username: user,
                 password: pass,
                 country_name: country,
-                budget: 2000,
-                income: 150,
-                oil: 100,
-                ore: 100,
-                energy: 50,
-                happiness: 75,
-                military_power: 0,
-                buildings: ["🏛 Урядовий квартал"],
+                budget: preset.budget,
+                population: preset.population,
+                income: preset.income,
+                energy_consumption: preset.energy_consumption,
+                garrison: preset.garrison,
+                oil: preset.oil,
+                mines: preset.mines,
+                warehouses: preset.warehouses,
+                legitimacy: preset.legitimacy,
+                has_net: preset.has_net,
+                provinces: preset.provinces,
+                buildings: [],
                 army: []
             }]).select().single();
 
@@ -355,23 +338,70 @@
         document.getElementById('authSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('hidden');
 
-        document.getElementById('countryTitle').innerText = currentPlayer.country_name || 'Держава';
-        document.getElementById('rulerName').innerText = currentPlayer.username || 'Правитель';
-        document.getElementById('statBudget').innerText = currentPlayer.budget ?? 2000;
-        document.getElementById('statIncome').innerText = '+' + (currentPlayer.income ?? 150);
-        document.getElementById('statOil').innerText = currentPlayer.oil ?? 100;
-        document.getElementById('statOre').innerText = currentPlayer.ore ?? 100;
-        document.getElementById('statEnergy').innerText = (currentPlayer.energy ?? 50) + '%';
-        document.getElementById('statHappiness').innerText = (currentPlayer.happiness ?? 75) + '%';
-        document.getElementById('statMilitaryPower').innerText = currentPlayer.military_power ?? 0;
+        document.getElementById('countryTitle').innerText = currentPlayer.country_name;
+        document.getElementById('rulerName').innerText = currentPlayer.username;
 
-        document.getElementById('buildingsList').innerText = currentPlayer.buildings ? currentPlayer.buildings.join(', ') : 'Немає';
-        document.getElementById('armyList').innerText = currentPlayer.army ? currentPlayer.army.join(', ') : 'Немає військ';
+        // Статистика
+        document.getElementById('statBudget').innerText = Number(currentPlayer.budget).toLocaleString() + ' $';
+        document.getElementById('statPopulation').innerText = (currentPlayer.population || 43) + ' млн осіб';
+        document.getElementById('statIncome').innerText = '+' + (currentPlayer.income || 85) + ' млн / день';
+        document.getElementById('statEnergy').innerText = (currentPlayer.energy_consumption || -172) + '%';
+        document.getElementById('statOil').innerText = (currentPlayer.oil || 0) + ' л / день';
+        document.getElementById('statMines').innerText = (currentPlayer.mines || 0) + ' / ' + (currentPlayer.warehouses || 0);
+        document.getElementById('statMilitaryPower').innerText = currentPlayer.garrison || "35,000 осіб";
 
+        // Статус країни
+        const legBadge = document.getElementById('statusLegitimacy');
+        if(currentPlayer.legitimacy || (currentPlayer.buildings && currentPlayer.buildings.includes("🏛 Урядовий квартал"))) {
+            legBadge.className = "status-badge status-success";
+            legBadge.innerText = "✅ Є (Урядовий квартал збудовано)";
+        } else {
+            legBadge.className = "status-badge status-danger";
+            legBadge.innerText = "❌ Ні (Потрібно побудувати Урядовий квартал)";
+        }
+
+        const netBadge = document.getElementById('statusNet');
+        if(currentPlayer.has_net || (currentPlayer.buildings && (currentPlayer.buildings.includes("📡 Вишка 4G") || currentPlayer.buildings.includes("⚡️ Вишка 5G")))) {
+            netBadge.className = "status-badge status-success";
+            netBadge.innerText = "✅ Підключено";
+        } else {
+            netBadge.className = "status-badge status-danger";
+            netBadge.innerText = "❌ Немає 4G/5G";
+        }
+
+        document.getElementById('buildingsList').innerText = currentPlayer.buildings && currentPlayer.buildings.length > 0 ? currentPlayer.buildings.join(', ') : 'Порожньо';
+        document.getElementById('armyList').innerText = currentPlayer.army && currentPlayer.army.length > 0 ? currentPlayer.army.join(', ') : (currentPlayer.garrison || '35,000 осіб (базовий гарнізон)');
+
+        renderProvinces();
         renderShop();
         renderArmyShop();
-        loadMarket();
-        loadMessages();
+    }
+
+    function renderProvinces() {
+        const grid = document.getElementById('provincesGrid');
+        grid.innerHTML = '';
+
+        const provinces = currentPlayer.provinces || [
+            { name: "🍺 Баварія", pop: 13, income: 35, energy: -52, buildings: "Порожньо" },
+            { name: "🏭 Північний Рейн-Вестфалія", pop: 12, income: 30, energy: -48, buildings: "Порожньо" },
+            { name: "🥨 Баден-Вюртемберг", pop: 8, income: 15, energy: -32, buildings: "Порожньо" },
+            { name: "🏰 Нижня Саксонія", pop: 6, income: 5, energy: -24, buildings: "Порожньо" },
+            { name: "🐻 Берлін (столичний округ)", pop: 4, income: 0, energy: -16, buildings: "Порожньо" }
+        ];
+
+        provinces.forEach(p => {
+            grid.innerHTML += `
+                <div class="item-card">
+                    <div>
+                        <h4 style="margin:0 0 10px 0; color:var(--accent);">${p.name}</h4>
+                        👥 Населення: <b>${p.pop} млн</b><br>
+                        💵 Базовий дохід: <b>+${p.income} млн / день</b><br>
+                        ⚡️ Споживання Енергії: <b style="color:var(--danger);">${p.energy}%</b><br>
+                        🏛 Будівлі: <b>${p.buildings}</b>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     function showTab(tabName, btn) {
@@ -379,16 +409,18 @@
         btn.classList.add('active');
 
         document.getElementById('tabDashboard').classList.add('hidden');
+        document.getElementById('tabProvinces').classList.add('hidden');
         document.getElementById('tabBuild').classList.add('hidden');
         document.getElementById('tabArmy').classList.add('hidden');
         document.getElementById('tabMarket').classList.add('hidden');
         document.getElementById('tabDiplomacy').classList.add('hidden');
 
         if(tabName === 'dashboard') document.getElementById('tabDashboard').classList.remove('hidden');
+        if(tabName === 'provinces') document.getElementById('tabProvinces').classList.remove('hidden');
         if(tabName === 'build') document.getElementById('tabBuild').classList.remove('hidden');
         if(tabName === 'army') document.getElementById('tabArmy').classList.remove('hidden');
-        if(tabName === 'market') { document.getElementById('tabMarket').classList.remove('hidden'); loadMarket(); }
-        if(tabName === 'diplomacy') { document.getElementById('tabDiplomacy').classList.remove('hidden'); loadMessages(); }
+        if(tabName === 'market') document.getElementById('tabMarket').classList.remove('hidden');
+        if(tabName === 'diplomacy') document.getElementById('tabDiplomacy').classList.remove('hidden');
     }
 
     function switchCategory(cat, btn) {
@@ -418,13 +450,23 @@
     }
 
     async function buyBuilding(name, cost) {
-        if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету!');
+        const costInFull = cost * 1000000;
+        if((currentPlayer.budget || 0) < costInFull) return alert('Нестача бюджету!');
 
-        currentPlayer.budget -= cost;
+        currentPlayer.budget -= costInFull;
         if(!currentPlayer.buildings) currentPlayer.buildings = [];
         currentPlayer.buildings.push(name);
 
-        await db.from('players').update({ budget: currentPlayer.budget, buildings: currentPlayer.buildings }).eq('id', currentPlayer.id);
+        if(name === "🏛 Урядовий квартал") currentPlayer.legitimacy = true;
+        if(name.includes("4G") || name.includes("5G")) currentPlayer.has_net = true;
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            buildings: currentPlayer.buildings,
+            legitimacy: currentPlayer.legitimacy,
+            has_net: currentPlayer.has_net
+        }).eq('id', currentPlayer.id);
+
         alert(`Збудовано: ${name}`);
         loadGameUI();
     }
@@ -449,122 +491,23 @@
                         Вартість: <b style="color:var(--accent);">${a.cost} млн $</b> | Сила: <b style="color:var(--danger);">+${a.power}</b><br>
                         <small>${a.desc}</small>
                     </div>
-                    <button class="btn btn-success" style="margin-top:10px;" onclick="buyArmy('${a.name}', ${a.cost}, ${a.power})">Закупити</button>
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="buyArmy('${a.name}', ${a.cost})">Закупити</button>
                 </div>
             `;
         });
     }
 
-    async function buyArmy(name, cost, power) {
-        if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету на закупівлю!');
+    async function buyArmy(name, cost) {
+        const costInFull = cost * 1000000;
+        if((currentPlayer.budget || 0) < costInFull) return alert('Нестача бюджету!');
 
-        currentPlayer.budget -= cost;
-        currentPlayer.military_power = (currentPlayer.military_power || 0) + power;
+        currentPlayer.budget -= costInFull;
         if(!currentPlayer.army) currentPlayer.army = [];
         currentPlayer.army.push(name);
 
-        await db.from('players').update({ budget: currentPlayer.budget, military_power: currentPlayer.military_power, army: currentPlayer.army }).eq('id', currentPlayer.id);
-        alert(`Придбано підрозділ/техніку: ${name}`);
+        await db.from('players').update({ budget: currentPlayer.budget, army: currentPlayer.army }).eq('id', currentPlayer.id);
+        alert(`Закуплено: ${name}`);
         loadGameUI();
-    }
-
-    async function createOffer() {
-        const type = document.getElementById('sellType').value;
-        const amount = parseInt(document.getElementById('sellAmount').value);
-        const price = parseInt(document.getElementById('sellPrice').value);
-
-        if(!amount || !price || amount <= 0 || price <= 0) return alert('Введіть коректні дані!');
-        if(type === 'oil' && (currentPlayer.oil || 0) < amount) return alert('Нестача нафти!');
-        if(type === 'ore' && (currentPlayer.ore || 0) < amount) return alert('Нестача руди!');
-
-        if(type === 'oil') currentPlayer.oil -= amount;
-        if(type === 'ore') currentPlayer.ore -= amount;
-
-        await db.from('players').update({ oil: currentPlayer.oil, ore: currentPlayer.ore }).eq('id', currentPlayer.id);
-        
-        await db.from('market_offers').insert([{
-            seller_id: currentPlayer.id,
-            seller_name: currentPlayer.country_name,
-            item_type: type,
-            amount: amount,
-            price_per_unit: price
-        }]);
-
-        alert('Лот успішно виставлено!');
-        loadGameUI();
-    }
-
-    async function loadMarket() {
-        const { data } = await db.from('market_offers').select('*');
-        const list = document.getElementById('marketList');
-        list.innerHTML = '';
-
-        if(!data || data.length === 0) { list.innerHTML = 'На ринку немає активних лотів.'; return; }
-
-        data.forEach(o => {
-            const total = o.amount * o.price_per_unit;
-            list.innerHTML += `
-                <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <b>${o.seller_name}</b> продає ${o.amount} од. (${o.item_type === 'oil' ? '🛢 Нафта' : '⛏ Руда'}) за <b>${total} млн $</b>
-                    </div>
-                    ${o.seller_id !== currentPlayer.id ? `<button class="btn btn-success" style="width:auto;" onclick="buyOffer('${o.id}', '${o.seller_id}', '${o.item_type}', ${o.amount}, ${total})">Купити</button>` : '<small>Ваш лот</small>'}
-                </div>
-            `;
-        });
-    }
-
-    async function buyOffer(offerId, sellerId, type, amount, totalCost) {
-        if((currentPlayer.budget || 0) < totalCost) return alert('Нестача бюджету!');
-
-        currentPlayer.budget -= totalCost;
-        if(type === 'oil') currentPlayer.oil = (currentPlayer.oil || 0) + amount;
-        if(type === 'ore') currentPlayer.ore = (currentPlayer.ore || 0) + amount;
-
-        await db.from('players').update({ budget: currentPlayer.budget, oil: currentPlayer.oil, ore: currentPlayer.ore }).eq('id', currentPlayer.id);
-
-        const { data: seller } = await db.from('players').select('*').eq('id', sellerId).single();
-        if(seller) {
-            await db.from('players').update({ budget: (seller.budget || 0) + totalCost }).eq('id', sellerId);
-        }
-
-        await db.from('market_offers').delete().eq('id', offerId);
-        alert('Покупка здійснена успішно!');
-        loadGameUI();
-    }
-
-    async function sendMessage() {
-        const receiver = document.getElementById('msgReceiver').value;
-        const text = document.getElementById('msgText').value.trim();
-
-        if(!text) return alert('Введіть текст ноти!');
-
-        await db.from('messages').insert([{
-            sender_name: currentPlayer.country_name,
-            receiver_country: receiver,
-            text: text
-        }]);
-
-        document.getElementById('msgText').value = '';
-        alert('Дипломатичну ноту надіслано!');
-        loadMessages();
-    }
-
-    async function loadMessages() {
-        const { data } = await db.from('messages').select('*').or(`sender_name.eq.${currentPlayer.country_name},receiver_country.eq.${currentPlayer.country_name}`).order('created_at', {ascending: false});
-        const box = document.getElementById('chatBox');
-        box.innerHTML = '';
-
-        if(!data || data.length === 0) { box.innerHTML = 'Листування відсутнє.'; return; }
-
-        data.forEach(m => {
-            box.innerHTML += `
-                <div class="msg">
-                    <small style="color:var(--accent);">${m.sender_name} ➔ ${m.receiver_country}:</small><br>
-                    ${m.text}
-                </div>
-            `;
-        });
     }
 
     function logout() { location.reload(); }
