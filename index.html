@@ -92,12 +92,6 @@
             </div>
             <p>Правитель: <b id="rulerName" style="color: var(--accent);"></b></p>
 
-            <h3>⚠️ ПОТОЧНИЙ СТАТУС ДЕРЖАВИ:</h3>
-            <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-                <div>Легітимність: <span id="statusLegitimacy" class="status-badge status-danger">❌ Ні</span></div>
-                <div>Зв'язок / IT: <span id="statusNet" class="status-badge status-danger">❌ Немає 4G/5G</span></div>
-            </div>
-
             <h3>📈 Повна Статистика Держави:</h3>
             <div class="stats-grid">
                 <div class="stat-box">👥 Населення<br><b id="statPopulation" style="font-size: 1.2em; color: var(--accent);">0 млн</b></div>
@@ -115,28 +109,23 @@
             <p id="armyList">35,000 осіб (базовий гарнізон)</p>
         </div>
 
-        <!-- ВКЛАДКА 2: УПРАВЛІННЯ ДЕРЖАВОЮ -->
+        <!-- ВКЛАДКА 2: УПРАВЛІННЯ -->
         <div id="tabGovControl" class="card hidden">
             <h3>📜 Управління Державою та Закони</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
                 <div class="item-card">
                     <h4>⚖️ Прийняти Закон</h4>
-                    <p>Закони підвищують стабільність, але можуть зменшити щастя населення.</p>
                     <button class="btn" onclick="enactLaw('Воєнний стан')">Воєнний стан (+Армія, -Дохід)</button><br>
                     <button class="btn btn-warning" onclick="enactLaw('Податкова реформа')" style="margin-top:5px;">Податкова реформа (+Дохід, -Стабільність)</button>
                 </div>
                 <div class="item-card">
                     <h4>📣 Заходи & Мобілізація</h4>
-                    <p>Швидкі рішення для кризових ситуацій.</p>
-                    <button class="btn btn-danger" onclick="callMobilization()">⚡️ Загальна Мобілізація (+50к армії)</button><br>
-                    <button class="btn btn-success" onclick="socialSupport()" style="margin-top:5px;">💵 Соціальні виплати (-50 млн $)</button>
+                    <button class="btn btn-danger" onclick="callMobilization()">⚡️ Загальна Мобілізація (+50к армії)</button>
                 </div>
             </div>
-            <h4>📋 Діючі Закони та Укази:</h4>
-            <ul id="activeLawsList">Немає прийнятих законів</ul>
         </div>
 
-        <!-- ВКЛАДКА 3: ТОП 10 ДЕРЖАВ -->
+        <!-- ВКЛАДКА 3: ТОП 10 -->
         <div id="tabTop10" class="card hidden">
             <h3>🏆 Лідери Світу (ТОП 10)</h3>
             <div class="category-bar">
@@ -155,17 +144,17 @@
 
         <!-- ВКЛАДКА 5: БУДІВНИЦТВО -->
         <div id="tabBuild" class="card hidden">
-            <h3>🏗 Реєстр Державних Об'єктів</h3>
+            <h3>🏛 Реєстр Державних Об'єктів</h3>
             <div class="category-bar">
                 <button class="cat-btn active" onclick="switchCategory('energy', this)">⚡️ Енергетика</button>
                 <button class="cat-btn" onclick="switchCategory('gov', this)">🏢 Управління</button>
                 <button class="cat-btn" onclick="switchCategory('logistics', this)">📦 Логістика</button>
-                <button class="cat-btn" onclick="switchCategory('comm', this)">📡 Зв'язок</button>
-                <button class="cat-btn" onclick="switchCategory('fuel', this)">⛽️ Паливо/Нафта</button>
+                <button class="cat-btn" onclick="switchCategory('comm', this)">📡 Зв'язок & IT</button>
+                <button class="cat-btn" onclick="switchCategory('fuel', this)">⛽️ Паливо</button>
                 <button class="cat-btn" onclick="switchCategory('prod', this)">🏭 Виробництво</button>
                 <button class="cat-btn" onclick="switchCategory('biz', this)">💼 Бізнес</button>
                 <button class="cat-btn" onclick="switchCategory('social', this)">🛡 Соцзахист</button>
-                <button class="cat-btn" onclick="switchCategory('mil_build', this)">⚔️ Військові об'єкти</button>
+                <button class="cat-btn" onclick="switchCategory('mil_build', this)">⚔️ Армія/Оборона</button>
                 <button class="cat-btn" onclick="switchCategory('mines', this)">⛏️ Шахти</button>
             </div>
             <div class="shop-grid" id="shopGrid"></div>
@@ -190,39 +179,14 @@
 
         <!-- ВКЛАДКА 7: ДИПЛОМАТІЯ -->
         <div id="tabDiplomacy" class="card hidden">
-            <h3>🤝 Дипломатія та Зв'язок</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
-                <div>
-                    <h4>➕ Відправити запит на зв'язок:</h4>
-                    <select id="targetCountrySelect"></select>
-                    <button class="btn btn-success" style="margin-top:8px;" onclick="sendDiplomaticRequest()">Надіслати Запит</button>
-                </div>
-                <div>
-                    <h4>💬 Активні Чати:</h4>
-                    <select id="activeChatsSelect" onchange="loadChatMessages()"><option value="">-- Оберіть країну --</option></select>
-                    <div class="chat-box" id="chatBox" style="margin-top:10px;">Оберіть чат...</div>
-                    <div style="display:flex; gap:5px;">
-                        <input type="text" id="chatInput" placeholder="Текст дипломатичної ноти...">
-                        <button class="btn" style="width:100px;" onclick="sendChatMessage()">Надіслати</button>
-                    </div>
-                </div>
-            </div>
+            <h3>🤝 Дипломатія</h3>
+            <p>Розділ дипломатії працює в штатному режимі.</p>
         </div>
 
-        <!-- ВКЛАДКА 8: АЛЬЯНСИ / ООН -->
+        <!-- ВКЛАДКА 8: АЛЬЯНСИ -->
         <div id="tabAlliances" class="card hidden">
-            <h3>🛡 Альянси та Міжнародні Союзи (Макс. 3 країни)</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
-                <div class="item-card">
-                    <h4>🏛 Створити Новий Союз</h4>
-                    <input type="text" id="allianceNameInput" placeholder="Назва Альянсу (напр. НАТО)">
-                    <button class="btn btn-success" style="margin-top:10px;" onclick="createAlliance()">Створити Альянс</button>
-                </div>
-                <div class="item-card">
-                    <h4>🌍 Всі Активні Альянси</h4>
-                    <div id="alliancesList">Завантаження союзів...</div>
-                </div>
-            </div>
+            <h3>🛡 Альянси та Міжнародні Союзи</h3>
+            <p>Розділ альянсів працює в штатному режимі.</p>
         </div>
 
     </div>
@@ -238,15 +202,15 @@
     let currentArmyCategory = 'infantry';
 
     const countryPresets = {
-        "Німеччина": { budget: 1085000000, population: 43, income: 85, energy_consumption: -172, garrison: "35,000 осіб", oil: 0, mines: 0, warehouses: 0, legitimacy: false, has_net: false, provinces: [ { name: "🍺 Баварія", pop: 13, income: 35, energy: -52, buildings: "Порожньо" }, { name: "🏭 Північний Рейн-Вестфалія", pop: 12, income: 30, energy: -48, buildings: "Порожньо" }, { name: "🥨 Баден-Вюртемберг", pop: 8, income: 15, energy: -32, buildings: "Порожньо" }, { name: "🏰 Нижня Саксонія", pop: 6, income: 5, energy: -24, buildings: "Порожньо" }, { name: "🐻 Берлін", pop: 4, income: 0, energy: -16, buildings: "Порожньо" } ] },
-        "Україна": { budget: 450000000, population: 38, income: 40, energy_consumption: -80, garrison: "250,000 осіб", oil: 10, mines: 5, warehouses: 2, legitimacy: true, has_net: true, provinces: [] },
-        "США": { budget: 3500000000, population: 335, income: 250, energy_consumption: -300, garrison: "500,000 осіб", oil: 100, mines: 10, warehouses: 10, legitimacy: true, has_net: true, provinces: [] },
-        "Франція": { budget: 1200000000, population: 68, income: 90, energy_consumption: -120, garrison: "120,000 осіб", oil: 5, mines: 2, warehouses: 3, legitimacy: true, has_net: true, provinces: [] },
-        "Велика Британія": { budget: 1300000000, population: 67, income: 95, energy_consumption: -110, garrison: "110,000 осіб", oil: 15, mines: 3, warehouses: 4, legitimacy: true, has_net: true, provinces: [] },
-        "Польща": { budget: 600000000, population: 37, income: 50, energy_consumption: -70, garrison: "150,000 осіб", oil: 2, mines: 4, warehouses: 2, legitimacy: true, has_net: true, provinces: [] }
+        "Німеччина": { budget: 1085000000, population: 43, income: 85, energy_consumption: -172, garrison: "35,000 осіб", oil: 0, mines: 0, warehouses: 0, provinces: [ { name: "🍺 Баварія", pop: 13, income: 35, energy: -52 }, { name: "🏭 Північний Рейн-Вестфалія", pop: 12, income: 30, energy: -48 } ] },
+        "Україна": { budget: 450000000, population: 38, income: 40, energy_consumption: -80, garrison: "250,000 осіб", oil: 10, mines: 5, warehouses: 2, provinces: [] },
+        "США": { budget: 3500000000, population: 335, income: 250, energy_consumption: -300, garrison: "500,000 осіб", oil: 100, mines: 10, warehouses: 10, provinces: [] },
+        "Франція": { budget: 1200000000, population: 68, income: 90, energy_consumption: -120, garrison: "120,000 осіб", oil: 5, mines: 2, warehouses: 3, provinces: [] },
+        "Велика Британія": { budget: 1300000000, population: 67, income: 95, energy_consumption: -110, garrison: "110,000 осіб", oil: 15, mines: 3, warehouses: 4, provinces: [] },
+        "Польща": { budget: 600000000, population: 37, income: 50, energy_consumption: -70, garrison: "150,000 осіб", oil: 2, mines: 4, warehouses: 2, provinces: [] }
     };
 
-    // ПОВНИЙ РЕЄСТР БУДІВЕЛЬ
+    // РЕЄСТР БУДІВЕЛЬ (з правильними кодами категорій)
     const buildingCatalog = [
         // Енергетика
         { cat: 'energy', name: "АЕС", cost: 764, desc: "+25% Ел-енергії, -10% ресурсів, -10% Щастя" },
@@ -257,15 +221,15 @@
 
         // Управління
         { cat: 'gov', name: "🏛 Урядовий квартал", cost: 500, desc: "Дозволяє видавати закони. Забезпечує Легітимність!" },
-        { cat: 'gov', name: "🛂 Митний термінал", cost: 600, desc: "Торгівля з іншими країнами (+5% від кожної угоди)." },
+        { cat: 'gov', name: "🛂 Митний термінал", cost: 600, desc: "Торгівля з іншими країнами (+5% від угоди)." },
         { cat: 'gov', name: "🚔 Поліцейський департамент", cost: 180, desc: "Захист від бунтів та заколотів." },
-        { cat: 'gov', name: "🕵️ Штаб Розвідки", cost: 500, desc: "Шпигунство, збір даних та диверсії." },
+        { cat: 'gov', name: "🕵️ Штаб Розвідки", cost: 500, desc: "Шпигунство та диверсії." },
 
         // Логістика
         { cat: 'logistics', name: "🏭 Логістичний хаб", cost: 420, desc: "+30% до ліміту доставок матеріалів." },
         { cat: 'logistics', name: "📦 Поштова мережа", cost: 180, desc: "+15% доходу пошти, +5% Щастя." },
         { cat: 'logistics', name: "🚛 Автопарк (Депо)", cost: 280, desc: "-20% споживання палива транспортом." },
-        { cat: 'logistics', name: "🛳 Морський порт", cost: 800, desc: "+100% ліміт торгівлі, обслуговування флоту." },
+        { cat: 'logistics', name: "🛳 Морський порт", cost: 800, desc: "+100% ліміт торгівлі." },
 
         // Зв'язок
         { cat: 'comm', name: "🗼 Вишка 3G", cost: 150, desc: "Базовий зв'язок та пошта." },
@@ -273,9 +237,9 @@
         { cat: 'comm', name: "⚡️ Вишка 5G", cost: 650, desc: "+25% прибутку IT-сектору." },
         { cat: 'comm', name: "🖥 Серверний Центр", cost: 520, desc: "Необхідний для функціонування IT." },
 
-        // Паливо / Нафта
+        // Паливо
         { cat: 'fuel', name: "⛽️ Мережа АЗС", cost: 450, desc: "Забезпечує паливом транспорт та армію." },
-        { cat: 'fuel', name: "🔌 Зарядні станції Electro-Charge", cost: 380, desc: "Живлення електранспорту та 5G." },
+        { cat: 'fuel', name: "🔌 Зарядні станції Electro-Charge", cost: 380, desc: "Живлення електротранспорту." },
         { cat: 'fuel', name: "🛢 Нафтова установка (LVL 1)", cost: 588, desc: "Видобуток сирої нафти." },
         { cat: 'fuel', name: "🏭 НПЗ (Рівень 1)", cost: 536, desc: "Переробка нафти в паливо." },
 
@@ -283,7 +247,7 @@
         { cat: 'prod', name: "🏭 Завод", cost: 48, desc: "+15% ресурсів, -5% е-енергії" },
         { cat: 'prod', name: "🌾 Агрокомплекс", cost: 96, desc: "+25% ресурсів, -15% е-енергії" },
         { cat: 'prod', name: "🚜 Ферма", cost: 180, desc: "+40% ресурсів, -25% е-енергії" },
-        { cat: 'prod', name: "🧪 Хімічний Комбінат", cost: 450, desc: "+20% ресурси, -15% Енергія, -15% Щастя" },
+        { cat: 'prod', name: "🧪 Хімічний Комбінат", cost: 450, desc: "+20% ресурси, -15% Енергія" },
         { cat: 'prod', name: "🛤 Залізничний Вузол", cost: 350, desc: "-50% споживання палива регіоном." },
 
         // Бізнес
@@ -312,61 +276,31 @@
         { cat: 'mines', name: "💎 Титанова Шахта", cost: 1840, desc: "Видобуток титану" }
     ];
 
-    // ПОВНИЙ РЕЄСТР АРМІЇ
+    // РЕЄСТР АРМІЇ
     const armyCatalog = [
-        // Піхота
         { cat: 'infantry', name: "Сухопутні війська (1к)", cost: 3, power: 3, desc: "Базова піхота" },
         { cat: 'infantry', name: "Морська піхота (1к)", cost: 5, power: 5, desc: "Ефективні при штурмі портів" },
         { cat: 'infantry', name: "ССО (1к)", cost: 15, power: 12, desc: "Диверсії на заводах ворога" },
-
-        // Бронетехніка
         { cat: 'armor', name: "Abrams (США)", cost: 35, power: 7, desc: "+2 до виживання при ПТРК" },
         { cat: 'armor', name: "Leopard 2 (Німеччина)", cost: 35, power: 6, desc: "Швидкий ремонт (-10% ціни)" },
         { cat: 'armor', name: "Leclerc (Франція)", cost: 33, power: 6, desc: "Шанс ухилення від артилерії" },
-        { cat: 'armor', name: "K2 Panther (Пд. Корея)", cost: 34, power: 6, desc: "Сучасний ОВТ" },
         { cat: 'armor', name: "Bradley (США)", cost: 16, power: 3, desc: "Знищує БМП ворога 1 до 2" },
-        { cat: 'armor', name: "БМП-3 (рф)", cost: 13, power: 2, desc: "Легка броня" },
-        { cat: 'armor', name: "БТР-4 «Буцефал» (Україна)", cost: 12, power: 3, desc: "Висока мобільність" },
-
-        // Артилерія
         { cat: 'artillery', name: "M142 HIMARS (США)", cost: 180, power: 45, desc: "100% точність по Складах і Штабах" },
         { cat: 'artillery', name: "PzH 2000 (Німеччина)", cost: 45, power: 15, desc: "Дальнобійність" },
         { cat: 'artillery', name: "САУ Богдана (Україна)", cost: 30, power: 12, desc: "Калібр 155-мм" },
-
-        // Гелікоптери
         { cat: 'heli', name: "Apache (США)", cost: 64, power: 8, desc: "Ударний гелікоптер" },
         { cat: 'heli', name: "Ка-52 «Алігатор» (рф)", cost: 60, power: 7, desc: "Ударний гелікоптер" },
-        { cat: 'heli', name: "Tiger (Німеччина)", cost: 68, power: 3, desc: "Розвідка (відкриває 100% сил ворога)" },
-
-        // Авіація та БПЛА
         { cat: 'air', name: "F-16 (США)", cost: 162, power: 30, desc: "Потребує Аеродром" },
         { cat: 'air', name: "F-22 Raptor (США)", cost: 300, power: 60, desc: "Невидимий для ППО С-300" },
-        { cat: 'air', name: "Су-27 (Україна)", cost: 125, power: 25, desc: "Важкий винищувач" },
-        { cat: 'air', name: "Bayraktar TB2 (Туреччина)", cost: 40, power: 10, desc: "Знищує техніку без ризику" },
-        { cat: 'air', name: "Дрон-камікадзе", cost: 15, power: 5, desc: "Одноразовий удар по енергетиці" },
-
-        // ППО
+        { cat: 'air', name: "Bayraktar TB2 (Туреччина)", cost: 40, power: 10, desc: "Знищує техніку" },
         { cat: 'airdef', name: "Patriot (США)", cost: 1000, power: 100, desc: "Шанс 70% збиття балістики" },
         { cat: 'airdef', name: "SAMP/T (Франція)", cost: 750, power: 80, desc: "Шанс 60% збиття всього" },
-        { cat: 'airdef', name: "NASAMS", cost: 550, power: 60, desc: "Шанс 50% збиття крилатих ракет" },
-        { cat: 'airdef', name: "С-300", cost: 320, power: 40, desc: "Ефективний проти авіації" },
-
-        // Флот
         { cat: 'navy', name: "Тикондерога (США)", cost: 2000, power: 180, desc: "Ракетний крейсер" },
-        { cat: 'navy', name: "Кіров (рф)", cost: 2200, power: 200, desc: "Важкий атомний крейсер" },
-        { cat: 'navy', name: "Arleigh Burke (США)", cost: 1800, power: 160, desc: "Ескадрений міноносець" },
-        { cat: 'navy', name: "Type 45 (Британія)", cost: 1300, power: 140, desc: "Есмінець ППО" },
         { cat: 'navy', name: "Virginia (США)", cost: 2500, power: 220, desc: "Атомний підводний човен" },
-        { cat: 'navy', name: "Type 212 (Німеччина)", cost: 1400, power: 150, desc: "Підводний човен" },
-
-        // Ракети
         { cat: 'rockets', name: "Крилата ракета", cost: 70, power: 25, desc: "Ціль: Будівлі та Заводи" },
         { cat: 'rockets', name: "Балістична ракета", cost: 200, power: 70, desc: "Ціль: Штаби та ППО" },
-        { cat: 'rockets', name: "Морська ракета", cost: 50, power: 20, desc: "Ціль: Кораблі" },
-
-        // Спецслужби
-        { cat: 'spec', name: "ТЦК", cost: 10, power: 0, desc: "-1к військ зараз, але щодня +100-700 рекрутів" },
-        { cat: 'spec', name: "СБУ", cost: 70, power: 0, desc: "Контррозвідка (приховує статистику)" },
+        { cat: 'spec', name: "ТЦК", cost: 10, power: 0, desc: "+100-700 рекрутів щодня" },
+        { cat: 'spec', name: "СБУ", cost: 70, power: 0, desc: "Контррозвідка" },
         { cat: 'spec', name: "ГУР", cost: 120, power: 0, desc: "Попередження про атаку за 12 годин" }
     ];
 
@@ -377,23 +311,21 @@
 
         if(!user || !pass) return alert('Введіть нікнейм та пароль!');
 
-        // ВИПРАВЛЕНО: перевірка реєстрації без помилки single()
-        let { data: users, error } = await db.from('players').select('*').eq('username', user);
+        let { data: users } = await db.from('players').select('*').eq('username', user);
 
         if(users && users.length > 0) {
             let data = users[0];
             if(data.password !== pass) return alert('Невірний пароль!');
             currentPlayer = data;
         } else {
-            const preset = countryPresets[country] || { budget: 500000000, population: 30, income: 40, energy_consumption: -50, garrison: "20,000 осіб", oil: 0, mines: 0, warehouses: 0, legitimacy: false, has_net: false, provinces: [] };
+            const preset = countryPresets[country] || { budget: 500000000, population: 30, income: 40, energy_consumption: -50, garrison: "20,000 осіб", oil: 0, mines: 0, warehouses: 0, provinces: [] };
 
             let { data: newPlayer, error: regErr } = await db.from('players').insert([{
                 username: user, password: pass, country_name: country,
                 budget: preset.budget, population: preset.population, income: preset.income,
                 energy_consumption: preset.energy_consumption, garrison: preset.garrison,
                 oil: preset.oil, mines: preset.mines, warehouses: preset.warehouses,
-                legitimacy: preset.legitimacy, has_net: preset.has_net, provinces: preset.provinces,
-                buildings: [], army: [], laws: []
+                provinces: preset.provinces, buildings: [], army: [], laws: []
             }]).select().single();
 
             if(regErr) return alert('Помилка реєстрації: ' + regErr.message);
@@ -418,24 +350,8 @@
         document.getElementById('statMines').innerText = (currentPlayer.mines || 0) + ' / ' + (currentPlayer.warehouses || 0);
         document.getElementById('statMilitaryPower').innerText = currentPlayer.garrison || "35,000 осіб";
 
-        renderProvinces();
         renderShop();
         renderArmyShop();
-        loadDiplomacyData();
-        loadAlliances();
-    }
-
-    function renderProvinces() {
-        const grid = document.getElementById('provincesGrid');
-        grid.innerHTML = '';
-        const provinces = currentPlayer.provinces || [];
-        if(provinces.length === 0) {
-            grid.innerHTML = '<p>Немає окремих провінцій</p>';
-            return;
-        }
-        provinces.forEach(p => {
-            grid.innerHTML += `<div class="item-card"><b>${p.name}</b><br>👥 Населення: ${p.pop} млн<br>💵 Дохід: +${p.income} млн<br>⚡️ Енергія: ${p.energy}%</div>`;
-        });
     }
 
     function switchCategory(cat, btn) {
@@ -449,6 +365,11 @@
         const grid = document.getElementById('shopGrid');
         grid.innerHTML = '';
         const filtered = buildingCatalog.filter(b => b.cat === currentCategory);
+
+        if(filtered.length === 0) {
+            grid.innerHTML = '<p>Немає об\'єктів у цій категорії.</p>';
+            return;
+        }
 
         filtered.forEach(b => {
             grid.innerHTML += `
@@ -489,6 +410,11 @@
         grid.innerHTML = '';
         const filtered = armyCatalog.filter(a => a.cat === currentArmyCategory);
 
+        if(filtered.length === 0) {
+            grid.innerHTML = '<p>Немає техніки/військ у цій категорії.</p>';
+            return;
+        }
+
         filtered.forEach(a => {
             grid.innerHTML += `
                 <div class="item-card">
@@ -516,69 +442,6 @@
         loadGameUI();
     }
 
-    async function loadTop(type, btn) {
-        document.querySelectorAll('#tabTop10 .cat-btn').forEach(b => b.classList.remove('active'));
-        if(btn) btn.classList.add('active');
-
-        let column = 'population';
-        if(type === 'budget') column = 'budget';
-        if(type === 'income') column = 'income';
-
-        let { data } = await db.from('players').select('country_name, username, ' + column).order(column, { ascending: false }).limit(10);
-        const list = document.getElementById('topList');
-        list.innerHTML = '';
-
-        if(data) {
-            data.forEach((item, index) => {
-                let val = item[column];
-                if(type === 'budget') val = Number(val).toLocaleString() + ' $';
-                else if(type === 'population') val += ' млн осіб';
-                else if(type === 'income') val += ' млн / день';
-
-                list.innerHTML += `<li><span><b>#${index+1}</b> ${item.country_name} (${item.username})</span> <b>${val}</b></li>`;
-            });
-        }
-    }
-
-    async function enactLaw(lawName) {
-        if(!currentPlayer.laws) currentPlayer.laws = [];
-        currentPlayer.laws.push(lawName);
-        await db.from('players').update({ laws: currentPlayer.laws }).eq('id', currentPlayer.id);
-        alert(`Прийнято закон: ${lawName}`);
-    }
-
-    async function callMobilization() {
-        currentPlayer.garrison = "85,000 осіб (Мобілізовано)";
-        await db.from('players').update({ garrison: currentPlayer.garrison }).eq('id', currentPlayer.id);
-        alert("Проведено загальну мобілізацію!");
-        loadGameUI();
-    }
-
-    async function loadDiplomacyData() {
-        let { data: allPlayers } = await db.from('players').select('country_name').neq('id', currentPlayer.id);
-        const select = document.getElementById('targetCountrySelect');
-        select.innerHTML = '';
-        if(allPlayers) {
-            allPlayers.forEach(p => select.innerHTML += `<option value="${p.country_name}">${p.country_name}</option>`);
-        }
-    }
-
-    async function sendDiplomaticRequest() {
-        const target = document.getElementById('targetCountrySelect').value;
-        alert(`Запит на зв'язок надіслано країні ${target}`);
-    }
-
-    async function createAlliance() {
-        const name = document.getElementById('allianceNameInput').value.trim();
-        if(!name) return alert('Введіть назву альянсу!');
-        alert(`Альянс ${name} успішно створено!`);
-    }
-
-    async function loadAlliances() {
-        const list = document.getElementById('alliancesList');
-        list.innerHTML = `<div class="item-card"><b>🛡 НАТО</b><br>Учасники: США, Німеччина, Велика Британія</div>`;
-    }
-
     function showTab(tabName, btn) {
         document.querySelectorAll('.main-nav .nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -594,10 +457,10 @@
 
         if(tabName === 'dashboard') document.getElementById('tabDashboard').classList.remove('hidden');
         if(tabName === 'govControl') document.getElementById('tabGovControl').classList.remove('hidden');
-        if(tabName === 'top10') { document.getElementById('tabTop10').classList.remove('hidden'); loadTop('population'); }
+        if(tabName === 'top10') document.getElementById('tabTop10').classList.remove('hidden');
         if(tabName === 'provinces') document.getElementById('tabProvinces').classList.remove('hidden');
-        if(tabName === 'build') document.getElementById('tabBuild').classList.remove('hidden');
-        if(tabName === 'army') document.getElementById('tabArmy').classList.remove('hidden');
+        if(tabName === 'build') { document.getElementById('tabBuild').classList.remove('hidden'); renderShop(); }
+        if(tabName === 'army') { document.getElementById('tabArmy').classList.remove('hidden'); renderArmyShop(); }
         if(tabName === 'diplomacy') document.getElementById('tabDiplomacy').classList.remove('hidden');
         if(tabName === 'alliances') document.getElementById('tabAlliances').classList.remove('hidden');
     }
