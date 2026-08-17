@@ -193,14 +193,9 @@
     let currentCategory = 'energy';
     let currentArmyCategory = 'infantry';
 
-    const countryPresets = {
-        "Німеччина": { budget: 1085000000, population: 43, income: 85, energy_consumption: -172, garrison: "35,000 осіб", oil: 0, mines: 0, warehouses: 0, provinces: [ { name: "🍺 Баварія", pop: 13, income: 35, energy: -52 }, { name: "🏭 Північний Рейн-Вестфалія", pop: 12, income: 30, energy: -48 } ] },
-        "Україна": { budget: 450000000, population: 38, income: 40, energy_consumption: -80, garrison: "250,000 осіб", oil: 10, mines: 5, warehouses: 2, provinces: [ { name: "🌾 Київщина", pop: 10, income: 15, energy: -20 }, { name: "⛏ Донбас", pop: 8, income: 12, energy: -30 } ] },
-        "США": { budget: 3500000000, population: 335, income: 250, energy_consumption: -300, garrison: "500,000 осіб", oil: 100, mines: 10, warehouses: 10, provinces: [ { name: "🌴 Каліфорнія", pop: 39, income: 80, energy: -90 }, { name: "🤠 Техас", pop: 30, income: 70, energy: -80 } ] },
-        "Франція": { budget: 1200000000, population: 68, income: 90, energy_consumption: -120, garrison: "120,000 осіб", oil: 5, mines: 2, warehouses: 3, provinces: [ { name: "🥐 Іль-де-Франс", pop: 12, income: 35, energy: -40 } ] },
-        "Велика Британія": { budget: 1300000000, population: 67, income: 95, energy_consumption: -110, garrison: "110,000 осіб", oil: 15, mines: 3, warehouses: 4, provinces: [ { name: "🏰 Англія", pop: 56, income: 80, energy: -90 } ] },
-        "Польща": { budget: 600000000, population: 37, income: 50, energy_consumption: -70, garrison: "150,000 осіб", oil: 2, mines: 4, warehouses: 2, provinces: [ { name: "🇵🇱 Мазовецьке", pop: 5, income: 15, energy: -20 } ] }
-    };
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
     const buildingCatalog = [
         { cat: 'energy', name: "АЕС", cost: 764, desc: "+25% Ел-енергії, -10% ресурсів" },
@@ -230,14 +225,24 @@
             if(data.password !== pass) return alert('Невірний пароль!');
             currentPlayer = data;
         } else {
-            const preset = countryPresets[country] || { budget: 500000000, population: 30, income: 40, energy_consumption: -50, garrison: "20,000 осіб", oil: 0, mines: 0, warehouses: 0, provinces: [] };
-
+            const randomPop = getRandomInt(10, 50);
+            
             let { data: newPlayer, error: regErr } = await db.from('players').insert([{
-                username: user, password: pass, country_name: country,
-                budget: preset.budget, population: preset.population, income: preset.income,
-                energy_consumption: preset.energy_consumption, garrison: preset.garrison,
-                oil: preset.oil, mines: preset.mines, warehouses: preset.warehouses,
-                provinces: preset.provinces, buildings: [], army: [], laws: []
+                username: user, 
+                password: pass, 
+                country_name: country,
+                budget: 1000000000, 
+                population: randomPop, 
+                income: 40,
+                energy_consumption: Math.round(randomPop * 7.3), 
+                garrison: "35,000 осіб",
+                oil: 0, 
+                mines: 0, 
+                warehouses: 0,
+                provinces: [ { name: "Головна провінція", pop: randomPop, income: 40, energy: -Math.round(randomPop * 7.3) } ], 
+                buildings: [], 
+                army: [], 
+                laws: []
             }]).select().single();
 
             if(regErr) return alert('Помилка реєстрації: ' + regErr.message);
@@ -252,18 +257,28 @@
         document.getElementById('authSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('hidden');
 
+        const pop = currentPlayer.population || 10;
+        const energyConsumption = Math.round(pop * 7.3);
+        const hasArmy = currentPlayer.army && currentPlayer.army.length > 0;
+        
+        let fuelText = "Виробництво: 0 л/день";
+        if(hasArmy) {
+            const randomFuelConsumption = getRandomInt(5, 25);
+            fuelText = `Виробництво: 0 л/день | Споживання: -${randomFuelConsumption}%`;
+        }
+
         document.getElementById('countryTitle').innerText = currentPlayer.country_name;
         document.getElementById('rulerName').innerText = currentPlayer.username;
-        document.getElementById('statPopulation').innerText = (currentPlayer.population || 0) + ' млн осіб';
+        document.getElementById('statPopulation').innerText = pop + ' млн осіб';
         document.getElementById('statBudget').innerText = Number(currentPlayer.budget).toLocaleString() + ' $';
-        document.getElementById('statIncome').innerText = '+' + (currentPlayer.income || 0) + ' млн / день';
-        document.getElementById('statEnergy').innerText = (currentPlayer.energy_consumption || 0) + '%';
-        document.getElementById('statOil').innerText = (currentPlayer.oil || 0) + ' л / день';
+        document.getElementById('statIncome').innerText = '+' + (currentPlayer.income || 40) + ' млн / день';
+        document.getElementById('statEnergy').innerText = energyConsumption + '%';
+        document.getElementById('statOil').innerText = fuelText;
         document.getElementById('statMines').innerText = (currentPlayer.mines || 0) + ' / ' + (currentPlayer.warehouses || 0);
         document.getElementById('statMilitaryPower').innerText = currentPlayer.garrison || "35,000 осіб";
 
         document.getElementById('buildingsList').innerText = currentPlayer.buildings && currentPlayer.buildings.length > 0 ? currentPlayer.buildings.join(', ') : 'Немає збудованих об\'єктів';
-        document.getElementById('armyList').innerText = currentPlayer.army && currentPlayer.army.length > 0 ? currentPlayer.army.join(', ') : currentPlayer.garrison || "35,000 осіб";
+        document.getElementById('armyList').innerText = currentPlayer.army && currentPlayer.army.length > 0 ? currentPlayer.army.join(', ') : 'Немає додаткових військ (тільки базовий гарнізон)';
 
         renderProvinces();
         renderShop();
@@ -271,7 +286,6 @@
         loadDiplomacyTargets();
     }
 
-    // ДОДАНО: Реалізація законів
     async function enactLaw(lawName) {
         if(!currentPlayer.laws) currentPlayer.laws = [];
         if(currentPlayer.laws.includes(lawName)) return alert('Цей закон вже прийнято!');
@@ -285,15 +299,14 @@
         loadGameUI();
     }
 
-    // ДОДАНО: Реалізація мобілізації
     async function callMobilization() {
+        if(!currentPlayer.army) currentPlayer.army = [];
         currentPlayer.army.push("Мобілізовані резерви (50к)");
         await db.from('players').update({ army: currentPlayer.army }).eq('id', currentPlayer.id);
         alert('Загальну мобілізацію оголошено!');
         loadGameUI();
     }
 
-    // ДОДАНО: Realtime Чат із збереженням у Supabase
     function initRealtimeChat() {
         db.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             appendChatMessage(payload.new.country, payload.new.username, payload.new.text);
@@ -341,7 +354,7 @@
                     <h4>${p.name}</h4>
                     <p>👥 Населення: <b>${p.pop} млн</b></p>
                     <p>💵 Дохід: <b>+${p.income} млн $</b></p>
-                    <p>⚡️ Споживання: <b>${p.energy}%</b></p>
+                    <p>⚡️ Споживання: <b>${Math.abs(p.energy)}%</b></p>
                 </div>`;
         });
     }
