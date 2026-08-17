@@ -76,7 +76,10 @@
         <div id="tabDashboard" class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>Держава: <span id="countryTitle" style="color: var(--accent);"></span></h2>
-                <button class="btn btn-danger" style="width: auto;" onclick="logout()">Вийти</button>
+                <div>
+                    <button class="btn btn-danger" style="width: auto;" onclick="deleteAccount()">🗑 Видалити акаунт</button>
+                    <button class="btn btn-warning" style="width: auto; margin-left: 5px;" onclick="logout()">Вийти</button>
+                </div>
             </div>
             <p>Правитель: <b id="rulerName" style="color: var(--accent);"></b></p>
             <h3>📈 Повна Статистика Держави:</h3>
@@ -87,9 +90,11 @@
                 <div class="stat-box">⚡️ Енергія<br><b id="statEnergy" style="color:var(--danger); font-size: 1.1em;">0%</b></div>
                 <div class="stat-box">🛢 Паливо<br><b id="statOil" style="font-size: 1.1em;">0 л / день</b></div>
                 <div class="stat-box">⛏ Шахти / Склади<br><b id="statMines" style="font-size: 1.1em;">0 / 0</b></div>
-                <div class="stat-box">🎖 Гарнізон / Армія<br><b id="statMilitaryPower" style="color: var(--danger); font-size: 1.1em;">0</b></div>
+                <div class="stat-box">🎖 Гарнізон / Сила<br><b id="statMilitaryPower" style="color: var(--danger); font-size: 1.1em;">0</b></div>
             </div>
-            <h4 style="margin-top:20px;">🏛 Побудовані Об'єкти:</h4>
+            <h4 style="margin-top:20px;">📜 Прийняті Закони та Режими:</h4>
+            <p id="lawsList">Немає активних режимів</p>
+            <h4>🏛 Побудовані Об'єкти:</h4>
             <p id="buildingsList">Порожньо</p>
             <h4>🪖 Війська та Сила:</h4>
             <p id="armyList">Базовий гарнізон</p>
@@ -98,15 +103,37 @@
         <div id="tabGovControl" class="card hidden">
             <h3>📜 Управління Державою та Закони</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
+                
                 <div class="item-card">
-                    <h4>⚖️ Прийняти Закон</h4>
-                    <button class="btn" onclick="enactLaw('Воєнний стан')">Воєнний стан (+Армія, -Дохід)</button><br>
-                    <button class="btn btn-warning" onclick="enactLaw('Податкова реформа')" style="margin-top:5px;">Податкова реформа (+Дохід, -Стабільність)</button>
+                    <h4>⚠️ Воєнний стан</h4>
+                    <p style="font-size: 0.9em; color: #cbd5e1;">Ціна: <b>250 млн $</b><br>• Додає <b>+50 Сили армії</b><br>• Збільшує споживання енергетики на <b>+50%</b></p>
+                    <button class="btn btn-danger" onclick="toggleMartialLaw()">Ввести / Скасувати Воєнний стан</button>
                 </div>
+
                 <div class="item-card">
-                    <h4>📣 Заходи & Мобілізація</h4>
-                    <button class="btn btn-danger" onclick="callMobilization()">⚡️ Загальна Мобілізація (+50к армії)</button>
+                    <h4>📈 Збільшити податки</h4>
+                    <p style="font-size: 0.9em; color: #cbd5e1;">• Додає <b>+50 млн $ / день</b> до доходу<br>⚠️ <b>Ризик бунту (50% шанс):</b> втрата <b>300 млн $</b> з бюджету!</p>
+                    <button class="btn btn-warning" onclick="increaseTaxes()">Підвищити податки</button>
                 </div>
+
+                <div class="item-card">
+                    <h4>🪖 Загальна Мобілізація</h4>
+                    <p style="font-size: 0.9em; color: #cbd5e1;">Ціна: <b>500 млн $</b><br>• Додає <b>+40,000 осіб</b> до вашої армії.</p>
+                    <button class="btn" onclick="callMobilization()">Провести Мобілізацію</button>
+                </div>
+
+                <div class="item-card">
+                    <h4>🏭 Националізація промисловості</h4>
+                    <p style="font-size: 0.9em; color: #cbd5e1;">Ціна: <b>150 млн $</b><br>• Передає підприємства під контроль держави.<br>• Додає <b>+20 млн $ / день</b> постійного доходу.</p>
+                    <button class="btn btn-success" onclick="nationalizeIndustry()">Націоналізувати</button>
+                </div>
+
+                <div class="item-card">
+                    <h4>💵 Друкарський верстат (Емісія)</h4>
+                    <p style="font-size: 0.9em; color: #cbd5e1;">• Одноразово додає <b>+200 млн $</b> у бюджет.<br>• Підвищує витрати/споживання енергії на <b>+15%</b> через інфляцію.</p>
+                    <button class="btn btn-warning" onclick="printMoney()">Друкувати гроші</button>
+                </div>
+
             </div>
         </div>
 
@@ -236,6 +263,7 @@
                 income: 40,
                 energy_consumption: Math.round(randomPop * 7.3), 
                 garrison: "35,000 осіб",
+                military_power: 0,
                 oil: 0, 
                 mines: 0, 
                 warehouses: 0,
@@ -257,8 +285,17 @@
         document.getElementById('authSection').classList.add('hidden');
         document.getElementById('gameSection').classList.remove('hidden');
 
+        if(!currentPlayer.laws) currentPlayer.laws = [];
+
         const pop = currentPlayer.population || 10;
-        const energyConsumption = Math.round(pop * 7.3);
+        let baseEnergy = Math.round(pop * 7.3);
+        
+        // Розрахунок модифікатора енергії за законами
+        let energyModifier = 0;
+        if(currentPlayer.laws.includes('Воєнний стан')) energyModifier += 50;
+        if(currentPlayer.laws.includes('Емісія грошей')) energyModifier += 15;
+
+        const totalEnergy = baseEnergy + energyModifier;
         const hasArmy = currentPlayer.army && currentPlayer.army.length > 0;
         
         let fuelText = "Виробництво: 0 л/день";
@@ -267,16 +304,19 @@
             fuelText = `Виробництво: 0 л/день | Споживання: -${randomFuelConsumption}%`;
         }
 
+        const milPowerDisplay = (currentPlayer.garrison || "35,000 осіб") + (currentPlayer.military_power ? ` (+${currentPlayer.military_power} сили)` : '');
+
         document.getElementById('countryTitle').innerText = currentPlayer.country_name;
         document.getElementById('rulerName').innerText = currentPlayer.username;
         document.getElementById('statPopulation').innerText = pop + ' млн осіб';
         document.getElementById('statBudget').innerText = Number(currentPlayer.budget).toLocaleString() + ' $';
         document.getElementById('statIncome').innerText = '+' + (currentPlayer.income || 40) + ' млн / день';
-        document.getElementById('statEnergy').innerText = energyConsumption + '%';
+        document.getElementById('statEnergy').innerText = totalEnergy + '%';
         document.getElementById('statOil').innerText = fuelText;
         document.getElementById('statMines').innerText = (currentPlayer.mines || 0) + ' / ' + (currentPlayer.warehouses || 0);
-        document.getElementById('statMilitaryPower').innerText = currentPlayer.garrison || "35,000 осіб";
+        document.getElementById('statMilitaryPower').innerText = milPowerDisplay;
 
+        document.getElementById('lawsList').innerText = currentPlayer.laws.length > 0 ? currentPlayer.laws.join(', ') : 'Немає активних режимів';
         document.getElementById('buildingsList').innerText = currentPlayer.buildings && currentPlayer.buildings.length > 0 ? currentPlayer.buildings.join(', ') : 'Немає збудованих об\'єктів';
         document.getElementById('armyList').innerText = currentPlayer.army && currentPlayer.army.length > 0 ? currentPlayer.army.join(', ') : 'Немає додаткових військ (тільки базовий гарнізон)';
 
@@ -286,26 +326,134 @@
         loadDiplomacyTargets();
     }
 
-    async function enactLaw(lawName) {
+    /* --- ЛОГІКА КНОПОК УПРАВЛІННЯ --- */
+
+    async function toggleMartialLaw() {
         if(!currentPlayer.laws) currentPlayer.laws = [];
-        if(currentPlayer.laws.includes(lawName)) return alert('Цей закон вже прийнято!');
 
-        currentPlayer.laws.push(lawName);
-        if(lawName === 'Воєнний стан') currentPlayer.income -= 10;
-        if(lawName === 'Податкова реформа') currentPlayer.income += 15;
+        if(currentPlayer.laws.includes('Воєнний стан')) {
+            // Скасування
+            currentPlayer.laws = currentPlayer.laws.filter(l => l !== 'Воєнний стан');
+            currentPlayer.military_power = Math.max(0, (currentPlayer.military_power || 0) - 50);
+            alert('Воєнний стан скасовано. Енергоспоживання знизилось.');
+        } else {
+            // Введення
+            const cost = 250000000;
+            if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету! Потрібно 250 млн $');
 
-        await db.from('players').update({ laws: currentPlayer.laws, income: currentPlayer.income }).eq('id', currentPlayer.id);
-        alert(`Закон "${lawName}" успішно прийнято!`);
+            currentPlayer.budget -= cost;
+            currentPlayer.laws.push('Воєнний стан');
+            currentPlayer.military_power = (currentPlayer.military_power || 0) + 50;
+            alert('🚨 Введено ВОЄННИЙ СТАН! +50 Сили армії, але споживання енергії зросло на +50%.');
+        }
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            laws: currentPlayer.laws, 
+            military_power: currentPlayer.military_power 
+        }).eq('id', currentPlayer.id);
+
+        loadGameUI();
+    }
+
+    async function increaseTaxes() {
+        if(!currentPlayer.laws) currentPlayer.laws = [];
+
+        // Перевірка на бунт (50% шанс)
+        const isRiot = Math.random() < 0.5;
+
+        if(isRiot) {
+            const penalty = 300000000;
+            currentPlayer.budget = Math.max(0, currentPlayer.budget - penalty);
+            alert('🔥 БУНТ ГРОМАДЯН! Через підвищення податків спалахнули протести. Втрачено 300 млн $ з бюджету!');
+        } else {
+            currentPlayer.income = (currentPlayer.income || 40) + 50;
+            if(!currentPlayer.laws.includes('Підвищені податки')) {
+                currentPlayer.laws.push('Підвищені податки');
+            }
+            alert('📈 Податки успішно підвищено! Дохід збільшено на +50 млн $ / день.');
+        }
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            income: currentPlayer.income, 
+            laws: currentPlayer.laws 
+        }).eq('id', currentPlayer.id);
+
         loadGameUI();
     }
 
     async function callMobilization() {
+        const cost = 500000000;
+        if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету! Потрібно 500 млн $');
+
+        currentPlayer.budget -= cost;
         if(!currentPlayer.army) currentPlayer.army = [];
-        currentPlayer.army.push("Мобілізовані резерви (50к)");
-        await db.from('players').update({ army: currentPlayer.army }).eq('id', currentPlayer.id);
-        alert('Загальну мобілізацію оголошено!');
+        currentPlayer.army.push("Мобілізовані резерви (+40к)");
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            army: currentPlayer.army 
+        }).eq('id', currentPlayer.id);
+
+        alert('🪖 Мобілізацію успішно проведено! До армії залучено +40,000 осіб.');
         loadGameUI();
     }
+
+    async function nationalizeIndustry() {
+        const cost = 150000000;
+        if((currentPlayer.budget || 0) < cost) return alert('Нестача бюджету! Потрібно 150 млн $');
+
+        currentPlayer.budget -= cost;
+        currentPlayer.income = (currentPlayer.income || 40) + 20;
+
+        if(!currentPlayer.laws.includes('Націоналізована промисловість')) {
+            currentPlayer.laws.push('Націоналізована промисловість');
+        }
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            income: currentPlayer.income, 
+            laws: currentPlayer.laws 
+        }).eq('id', currentPlayer.id);
+
+        alert('🏭 Промисловість націоналізовано! Дохід зростав на +20 млн $ / день.');
+        loadGameUI();
+    }
+
+    async function printMoney() {
+        if(!currentPlayer.laws) currentPlayer.laws = [];
+        
+        currentPlayer.budget = (currentPlayer.budget || 0) + 200000000;
+        
+        if(!currentPlayer.laws.includes('Емісія грошей')) {
+            currentPlayer.laws.push('Емісія грошей');
+        }
+
+        await db.from('players').update({ 
+            budget: currentPlayer.budget, 
+            laws: currentPlayer.laws 
+        }).eq('id', currentPlayer.id);
+
+        alert('💵 Надруковано +200 млн $! Але це збільшило витрати та навантаження (+15% до споживання енергії/інфляції).');
+        loadGameUI();
+    }
+
+    async function deleteAccount() {
+        const confirmDelete = confirm("Ви впевнені, що хочете остаточно видалити свій акаунт та всі дані держави?");
+        if (!confirmDelete) return;
+
+        const { error } = await db.from('players').delete().eq('id', currentPlayer.id);
+
+        if (error) {
+            alert('Помилка під час видалення акаунту: ' + error.message);
+        } else {
+            alert('Ваш акаунт успішно видалено з бази даних!');
+            location.reload();
+        }
+    }
+
+    /* --- ЧАТ ТА ІНШІ ФУНКЦІЇ --- */
 
     function initRealtimeChat() {
         db.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
