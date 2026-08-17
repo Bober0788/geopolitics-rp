@@ -25,14 +25,16 @@
         .category-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
         .cat-btn { background: #0f172a; border: 1px solid #334155; color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .cat-btn.active { background: var(--accent); color: #0f172a; }
-        .shop-grid, .province-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .item-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
         .hidden { display: none; }
-        .chat-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #334155; }
+        .chat-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 350px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #334155; }
         .top-list { list-style: none; padding: 0; }
         .top-list li { background: #0f172a; margin-bottom: 8px; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; border: 1px solid #334155; }
         .request-card { background: #0f172a; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin-left: 5px; }
+        .news-item { background: #0f172a; border-left: 4px solid var(--accent); padding: 12px; margin-bottom: 10px; border-radius: 4px; }
+        .news-bot { border-left-color: var(--warning); }
     </style>
 </head>
 <body>
@@ -68,13 +70,14 @@
             <div class="nav-btn active" onclick="showTab('dashboard', this)">📊 Статистика</div>
             <div class="nav-btn" onclick="showTab('govControl', this)">📜 Управління</div>
             <div class="nav-btn" onclick="showTab('top10', this)">🏆 Топ Держав</div>
-            <div class="nav-btn" onclick="showTab('provinces', this)">🗺 Провінції</div>
             <div class="nav-btn" onclick="showTab('build', this)">🏛 Будівництво</div>
             <div class="nav-btn" onclick="showTab('army', this)">🪖 Армія</div>
+            <div class="nav-btn" onclick="showTab('market', this)">🛒 Торгівля / Ринок</div>
+            <div class="nav-btn" onclick="showTab('events', this)">📰 Щоденні Події</div>
             <div class="nav-btn" onclick="showTab('diplomacy', this)">🤝 Дипломатія <span id="reqBadge" class="badge hidden">0</span></div>
-            <div class="nav-btn" onclick="showTab('alliances', this)">🛡 Союзи / ООН</div>
         </div>
 
+        <!-- 1. СТАТИСТИКА -->
         <div id="tabDashboard" class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>Держава: <span id="countryTitle" style="color: var(--accent);"></span></h2>
@@ -103,6 +106,7 @@
             <p id="armyList">Базовий гарнізон</p>
         </div>
 
+        <!-- 2. УПРАВЛІННЯ -->
         <div id="tabGovControl" class="card hidden">
             <h3>📜 Управління Державою та Закони</h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">
@@ -134,16 +138,13 @@
             </div>
         </div>
 
+        <!-- 3. ТОП 10 -->
         <div id="tabTop10" class="card hidden">
             <h3>🏆 Лідери Світу (ТОП 10)</h3>
             <ul class="top-list" id="topList">Завантаження...</ul>
         </div>
 
-        <div id="tabProvinces" class="card hidden">
-            <h3>🗺 Провінції та Землі Держави</h3>
-            <div class="province-grid" id="provincesGrid">Завантаження провінцій...</div>
-        </div>
-
+        <!-- 4. БУДІВНИЦТВО -->
         <div id="tabBuild" class="card hidden">
             <h3>🏛 Реєстр Державних та Корпоративних Об'єктів</h3>
             <div class="category-bar">
@@ -162,6 +163,7 @@
             <div class="shop-grid" id="shopGrid"></div>
         </div>
 
+        <!-- 5. АРМІЯ -->
         <div id="tabArmy" class="card hidden">
             <h3>🎖 Повний Реєстр Озброєння та Військової Техніки</h3>
             <div class="category-bar">
@@ -178,10 +180,66 @@
             <div class="shop-grid" id="armyGrid"></div>
         </div>
 
+        <!-- 6. ТОРГІВЛЯ / РИНОК -->
+        <div id="tabMarket" class="card hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>🛒 Міжнародний Ринок та Торгівля</h3>
+                <button class="btn" style="width:auto; padding:8px 18px;" onclick="refreshMarket()">🔄 Оновити ринок</button>
+            </div>
+
+            <!-- Форма виставлення товару -->
+            <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid var(--accent); margin:15px 0;">
+                <h4 style="margin-top:0; color:var(--accent);">➕ Виставити свій лот на продажу:</h4>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                    <div>
+                        <label>Товар / Ресурс:</label>
+                        <select id="marketItemType">
+                            <option value="🛢 Паливо (10,000 л)">🛢 Паливо (10,000 л)</option>
+                            <option value="📦 Промислові Ресурси">📦 Промислові Ресурси</option>
+                            <option value="⚡️ Електроенергія (Пакет)">⚡️ Електроенергія (Пакет)</option>
+                            <option value="🚜 Бронетехніка (Партія)">🚜 Бронетехніка (Партія)</option>
+                            <option value="🌾 Зерно та Агропродукція">🌾 Зерно та Агропродукція</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Ціна (млн $):</label>
+                        <input type="number" id="marketItemPrice" placeholder="Наприклад: 50" min="1">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn btn-success" onclick="createMarketOffer()">Виставити на продажу</button>
+                    </div>
+                </div>
+            </div>
+
+            <h4>📦 Активні лоти від гравців та світових держав (ботів):</h4>
+            <div class="shop-grid" id="marketGrid">Завантаження лотів...</div>
+        </div>
+
+        <!-- 7. ЩОДЕННІ ПОДІЇ -->
+        <div id="tabEvents" class="card hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>📰 Щоденні Геополітичні Події та Новини</h3>
+                <button class="btn" style="width:auto; padding:8px 18px;" onclick="refreshNews()">🔄 Оновити новини</button>
+            </div>
+
+            <!-- Форма створення новини -->
+            <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; margin:15px 0;">
+                <h4 style="margin-top:0; color:var(--accent);">📢 Опублікувати офіційну заяву вашої держави:</h4>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="newsInput" placeholder="Введіть текст події або заяви...">
+                    <button class="btn btn-success" style="width:180px;" onclick="publishNews()">Опублікувати</button>
+                </div>
+            </div>
+
+            <h4>🌐 Стрічка світових новин:</h4>
+            <div id="newsFeed">Завантаження новин...</div>
+        </div>
+
+        <!-- 8. ДИПЛОМАТІЯ -->
         <div id="tabDiplomacy" class="card hidden">
             <h3>🤝 Міжнародна Дипломатія</h3>
 
-            <!-- 1. КНОПКА ТА РОЗДІЛ ВХІДНИХ ЗАПИТІВ -->
+            <!-- КНОПКА ТА РОЗДІЛ ВХІДНИХ ЗАПИТІВ -->
             <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 style="margin:0; color: var(--accent);">📩 Вхідні Запити:</h4>
@@ -236,16 +294,6 @@
                 <button class="btn" style="width: 150px;" onclick="sendChatMessage()">Надіслати</button>
             </div>
         </div>
-
-        <div id="tabAlliances" class="card hidden">
-            <h3>🛡 Альянси та ООН</h3>
-            <p>Статус вашої країни: <b id="allianceStatusText">Нейтралітет / Поза блоками</b></p>
-            <div class="item-card" style="margin-top:15px;">
-                <h4>Створити новий альянс</h4>
-                <input type="text" id="allianceNameInput" placeholder="Назва альянсу (наприклад, НАТО)" style="margin-bottom:10px;">
-                <button class="btn btn-success" onclick="createAlliance()">Створити Блок</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -257,6 +305,113 @@
     let currentPlayer = null;
     let currentCategory = 'energy';
     let currentArmyCategory = 'infantry';
+
+    // База даних лотів для ринку (включаючи незареєстровані країни-боти)
+    let localMarketOffers = [];
+    const botCountries = ["🇧🇷 Бразилія", "🇮🇳 Індія", "🇯🇵 Японія", "🇨🇦 Канада", "🇦🇺 Австралія", "🇰🇷 Південна Корея", "🇹🇷 Туреччина", "🇸🇦 Саудівська Аравія", "🇲🇽 Мексика", "🇦🇷 Аргентина"];
+
+    // База з майже 100 новин від ботів
+    const botNewsDatabase = [
+        "Бразилія оголосила про рекордний врожай сої та розширення агроекспорту.",
+        "Індія успішно запустила нову космічну станцію та супутник зв'язку.",
+        "Японія презентувала інноваційні водневі реактори нового покоління.",
+        "Канада підписала масштабну енергетичну угоду з країнами Євросоюзу.",
+        "Австралія збільшує видобуток літію через зростаючий попит на акумулятори.",
+        "Південна Корея провела масштабні навчання ВМС у Тихому океані.",
+        "Туреччина відкрила нове родовище природного газу у Чорному морі.",
+        "Саудівська Аравія інвестує 50 мільярдів доларів у сонячну енергетику.",
+        "Мексика відкриває нові цифрові заводи з виробництва електромобілів.",
+        "Аргентина проводить масштабні реформи центрального банку.",
+        "На світових біржах зафіксовано різке стрибок цін на нафту та природний газ.",
+        "Міжнародний валютний фонд опублікував новий прогноз зростання світової економіки.",
+        "У Тихому океані пройшли спільні антипіратські навчання міжнародного флоту.",
+        "Вчені оголосили про прорив у сфері термоядерного синтезу.",
+        "Світові авіакомпанії переходять на нове екологічне біопаливо.",
+        "Бразилія розширює портову інфраструктуру для прискорення експорту.",
+        "Індія запустила національну програму будівництва швидкісних залізниць.",
+        "Японія виділяє гранти на розвиток штучного інтелекту в медицині.",
+        "Канада посилює заходи безпеки у своїх арктичних регіонах.",
+        "Австралія постраждала від сильного шторму, але логістика відновлюється.",
+        "Південна Корея підписала контракт на постачання бронетехніки до Європи.",
+        "Туреччина представила новий важкий безпілотник власної розробки.",
+        "Саудівська Аравія будує новий екологічний мегаполіс у пустелі.",
+        "Мексика збільшила обсяги видобутку срібла та кольорових металів.",
+        "Норвегія відкрила велике родовище рідкісноземельних елементів.",
+        "Швеція повністю перевела систему громадського транспорту на електрику.",
+        "Фінляндія запустила найсучасніший дата-центр у Північній Європі.",
+        "Швейцарія оголосила про нові стандарти кібербезпеки для банків.",
+        "ПАР нарощує видобуток платини та золота для світового ринку.",
+        "Єгипет завершив модернізацію Суецького каналу для великогабаритних суден.",
+        "ОАЕ запустили грандіозну сонячну електростанцію у пустелі.",
+        "Катар підписав довгостроковий контракт на постачання СПГ.",
+        "Індонезія переносить столицю та будує нові технологічні хаби.",
+        "В'єтнам став новим лідером із збірки мікрочіпів та електроніки.",
+        "Малайзія збільшує видобуток нафти на шельфі Південнокитайського моря.",
+        "Сінгапур визнано найбезпечнішим фінансовим хабом року.",
+        "Нова Зеландія запроваджує суворі норми екологічного фермерства.",
+        "Чилі збільшує видобуток міді для потреб світової електроніка.",
+        "Перу відкриває нові глибоководні порти для торгівлі з Азією.",
+        "Колумбія підписала нову угоду про вільну торгівлю.",
+        "Казахстан розширює Транскаспійський транспортний маршрут.",
+        "Узбекістан відкриває нові текстильні та металургійні комбінати.",
+        "Азербайджан збільшує прокачку газу за допомогою нових трубопроводів.",
+        "Грузія будує новий глибоководний порт на Чорному морі.",
+        "Румунія відкрила нову залізничну гілку до кордону з ЄС.",
+        "Болгарія розширює мережу вітрових електростанцій.",
+        "Греція збільшує торговельний флот і розширює суднобудування.",
+        "Іспанія запустила найбільший у Європі завод із виробництва водню.",
+        "Португалія розгортає нові плавучі сонячні панелі на водосховищах.",
+        "Ірландія залучила рекордні інвестиції у сферу біотехнологій.",
+        "Данія побудувала перший штучний енергетичний острів у Північному морі.",
+        "Бразилія запускає нову супутникову систему моніторингу лісів.",
+        "Індія випробувала власну гіперзвукову ракетну систему.",
+        "Японія розширює мережу робототехніки на промислових заводах.",
+        "Канада виділяє кошти на побудову нових криголамів.",
+        "Австралія підписала угоду про постачання урану для АЕС.",
+        "Південна Корея презентувала винищувач 5-го покоління.",
+        "Туреччина завершила будівництво нового залізничного мосту.",
+        "Саудівська Аравія придбала нові транспортні літаки.",
+        "Мексика розширює мережу нафтопереробних заводів.",
+        "Аргентина нарощує видобуток сланцевого газу.",
+        "Світовий океанографічний інститут заявив про зміну течій Гольфстрім.",
+        "На фондових біржах спостерігається зростання цін на технологічні акції.",
+        "Міжнародне агентство з енергетики закликає до збільшення резервів палива.",
+        "У Центральній Африці відкрито родовище високоякісного алмазу.",
+        "Азійський банк розвитку виділяє кредит на логістику Південно-Східної Азії.",
+        "Бразилія та Аргентина обговорюють створення спільної торгової валюти.",
+        "Індія випереджає графік цифровізації державних послуг.",
+        "Японія відновила роботу трьох атомних блоків для зниження цін на світло.",
+        "Канада оголосила про відкриття родовища титанових руд.",
+        "Австралія запроваджує нові системи ППО на північному узбережжі.",
+        "Південна Корея будує найбільший у світі верф для контейнеровозів.",
+        "Туреччина збільшує експорт безпілотних систем у 15 країн.",
+        "Саудівська Аравія заснувала новий космічний центр.",
+        "Мексика зафіксувала рекордне зростання автомобільного виробництва.",
+        "Норвегія тестує перший безпілотний вантажний фербот.",
+        "Фінляндія завершила зведення нового захисного рубежу.",
+        "Швейцарія збільшила золоті резерви до багаторічного максимуму.",
+        "ОАЕ відправили нову наукову місію до Марса.",
+        "Індонезія ввела в експлуатацію нову ГЕС потужністю 3 ГВт.",
+        "В'єтнам відкриває нову спеціальну економічну зону.",
+        "Казахстан збільшує транзит товарів між Європою та Азією.",
+        "Азербайджан підписав угоду про експорт зеленої енергії.",
+        "Іспанія розширює мережу швидкісних поїздів до кордону.",
+        "Греція відновлює стародавні суднобудівні верфі.",
+        "Данія оголосила про повну відмову від вугілля в енергетиці.",
+        "Швеція запустила виробництво екологічно чистої зеленої сталі.",
+        "Бразилія нарощує постачання яловичини та птиці на світовий ринок.",
+        "Індія будує понад 10,000 км нових автобанів за рік.",
+        "Японія розробила нові батареї з терміном служби 30 років.",
+        "Канада завершила модернізацію радіолокаційних станцій у Тундрі.",
+        "Австралія збільшує видобуток залізної руди для експорту.",
+        "Південна Корея розгортає мережу 6G у тестовому режимі.",
+        "Туреччина відкрила новий автомобільний тунель між Європою та Азією.",
+        "Саудівська Аравія відкрила найбільший аеропорт у регіоні.",
+        "Мексика залучила інвестиції у розробку літієвих родовищ.",
+        "Світовий геополітичний форум закликав до збереження миру та відкритої торгівлі."
+    ];
+
+    let currentNewsList = [];
 
     function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
@@ -378,7 +533,6 @@
                 mines: 0, 
                 warehouses: 0,
                 happiness: 100,
-                provinces: [ { name: "Головна провінція", pop: randomPop, income: 40, energy: -Math.round(randomPop * 7.3) } ], 
                 buildings: ["🏛 Урядовий квартал"], 
                 army: [], 
                 laws: [],
@@ -393,8 +547,9 @@
         loadGameUI();
         initRealtimeChat();
         subscribeToRequests();
+        generateInitialNews();
+        generateInitialMarket();
         
-        // Автоматичний фоновий опит кожні 3 секунди
         setInterval(loadIncomingRequests, 3000);
     }
 
@@ -438,13 +593,203 @@
         document.getElementById('buildingsList').innerText = currentPlayer.buildings && currentPlayer.buildings.length > 0 ? currentPlayer.buildings.join(', ') : 'Немає об\'єктів';
         document.getElementById('armyList').innerText = currentPlayer.army && currentPlayer.army.length > 0 ? currentPlayer.army.join(', ') : 'Базовий гарнізон';
 
-        renderProvinces();
         renderShop();
         renderArmyShop();
         loadDiplomacyTargets();
         loadIncomingRequests();
         renderActivePacts();
         checkAllianceChatUI();
+        renderMarket();
+        renderNews();
+    }
+
+    // --- РИНОК ТА ТОРГІВЛЯ ---
+
+    function generateInitialMarket() {
+        if(localMarketOffers.length > 0) return;
+        
+        // Генеруємо лоти від ботів/незареєстрованих країн
+        const botItems = ["🛢 Паливо (10,000 л)", "📦 Промислові Ресурси", "⚡️ Електроенергія (Пакет)", "🌾 Зерно та Агропродукція"];
+        for(let i = 0; i < 6; i++) {
+            const randomCountry = botCountries[getRandomInt(0, botCountries.length - 1)];
+            const randomItem = botItems[getRandomInt(0, botItems.length - 1)];
+            const randomPrice = getRandomInt(15, 80);
+
+            localMarketOffers.push({
+                id: Date.now() + i,
+                seller: randomCountry + " (Бот/NPC)",
+                item: randomItem,
+                price: randomPrice,
+                isBot: true
+            });
+        }
+    }
+
+    function renderMarket() {
+        const grid = document.getElementById('marketGrid');
+        grid.innerHTML = '';
+
+        if(localMarketOffers.length === 0) {
+            grid.innerHTML = '<p>На ринку немає активних лотів. Виставите свій лот або натисніть "Оновити ринок"!</p>';
+            return;
+        }
+
+        localMarketOffers.forEach(offer => {
+            grid.innerHTML += `
+                <div class="item-card">
+                    <div>
+                        <b>${offer.item}</b><br>
+                        Продавець: <b style="color:var(--accent);">${offer.seller}</b><br>
+                        Ціна: <b style="color:var(--success);">${offer.price} млн $</b>
+                    </div>
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="buyMarketItem(${offer.id})">Купити лот</button>
+                </div>`;
+        });
+    }
+
+    function createMarketOffer() {
+        const item = document.getElementById('marketItemType').value;
+        const price = parseInt(document.getElementById('marketItemPrice').value);
+
+        if(!price || price <= 0) return alert('Введіть коректну ціну!');
+
+        localMarketOffers.unshift({
+            id: Date.now(),
+            seller: `${currentPlayer.country_name} (${currentPlayer.username})`,
+            item: item,
+            price: price,
+            isBot: false,
+            sellerId: currentPlayer.id
+        });
+
+        alert(`Лот "${item}" за ${price} млн $ успішно виставлено на ринок!`);
+        document.getElementById('marketItemPrice').value = '';
+        renderMarket();
+    }
+
+    async function buyMarketItem(offerId) {
+        const idx = localMarketOffers.findIndex(o => o.id === offerId);
+        if(idx === -1) return alert('Лот вже продано або видалено!');
+
+        const offer = localMarketOffers[idx];
+        const costFull = offer.price * 1000000;
+
+        if((currentPlayer.budget || 0) < costFull) return alert('Нестача бюджету для купівлі лоту!');
+
+        // Знімаємо гроші у покупця
+        currentPlayer.budget -= costFull;
+
+        // Якщо продавець - гравець, додаємо йому гроші
+        if(!offer.isBot && offer.sellerId) {
+            let { data: sellerData } = await db.from('players').select('*').eq('id', offer.sellerId).single();
+            if(sellerData) {
+                let updatedBudget = (sellerData.budget || 0) + costFull;
+                await db.from('players').update({ budget: updatedBudget }).eq('id', offer.sellerId);
+            }
+        }
+
+        await db.from('players').update({ budget: currentPlayer.budget }).eq('id', currentPlayer.id);
+
+        localMarketOffers.splice(idx, 1);
+        alert(`Придбано "${offer.item}" за ${offer.price} млн $!`);
+        loadGameUI();
+    }
+
+    function refreshMarket() {
+        // Додаємо новий лот від ботів при оновленні
+        const randomCountry = botCountries[getRandomInt(0, botCountries.length - 1)];
+        const botItems = ["🛢 Паливо (10,000 л)", "📦 Промислові Ресурси", "⚡️ Електроенергія (Пакет)", "🚜 Бронетехніка (Партія)", "🌾 Зерно та Агропродукція"];
+        const randomItem = botItems[getRandomInt(0, botItems.length - 1)];
+        const randomPrice = getRandomInt(20, 90);
+
+        localMarketOffers.unshift({
+            id: Date.now(),
+            seller: randomCountry + " (Бот/NPC)",
+            item: randomItem,
+            price: randomPrice,
+            isBot: true
+        });
+
+        if(localMarketOffers.length > 12) localMarketOffers.pop();
+
+        renderMarket();
+        alert('🛍 Ринок успішно оновлено! Додано нові пропозиції від міжнародних партнерів.');
+    }
+
+    // --- ЩОДЕННІ ПОДІЇ ТА НОВИНИ ---
+
+    function generateInitialNews() {
+        if(currentNewsList.length > 0) return;
+        
+        // Вибираємо 10 випадкових новин із нашої бази ботів
+        for(let i = 0; i < 10; i++) {
+            const botCountry = botCountries[getRandomInt(0, botCountries.length - 1)];
+            const randomNewsText = botNewsDatabase[getRandomInt(0, botNewsDatabase.length - 1)];
+
+            currentNewsList.push({
+                author: botCountry + " (Прес-служба)",
+                text: randomNewsText,
+                time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+                isBot: true
+            });
+        }
+    }
+
+    function renderNews() {
+        const feed = document.getElementById('newsFeed');
+        feed.innerHTML = '';
+
+        if(currentNewsList.length === 0) {
+            feed.innerHTML = '<p>Стрічка новин порожня.</p>';
+            return;
+        }
+
+        currentNewsList.forEach(n => {
+            feed.innerHTML += `
+                <div class="news-item ${n.isBot ? 'news-bot' : ''}">
+                    <div style="display:flex; justify-content:space-between;">
+                        <b style="color:var(--accent);">${n.author}</b>
+                        <small style="color:#94a3b8;">${n.time}</small>
+                    </div>
+                    <p style="margin:8px 0 0 0;">${n.text}</p>
+                </div>`;
+        });
+    }
+
+    function publishNews() {
+        const txt = document.getElementById('newsInput').value.trim();
+        if(!txt) return alert('Введіть текст новини!');
+
+        currentNewsList.unshift({
+            author: `🇺🇦 ${currentPlayer.country_name} (${currentPlayer.username})`,
+            text: txt,
+            time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+            isBot: false
+        });
+
+        document.getElementById('newsInput').value = '';
+        renderNews();
+        alert('Заяву успішно опубліковано у стрічці новин!');
+    }
+
+    function refreshNews() {
+        // Додаємо 2 свіжі новини від ботів
+        for(let i = 0; i < 2; i++) {
+            const botCountry = botCountries[getRandomInt(0, botCountries.length - 1)];
+            const randomNewsText = botNewsDatabase[getRandomInt(0, botNewsDatabase.length - 1)];
+
+            currentNewsList.unshift({
+                author: botCountry + " (Прес-служба)",
+                text: randomNewsText,
+                time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+                isBot: true
+            });
+        }
+
+        if(currentNewsList.length > 30) currentNewsList.pop();
+
+        renderNews();
+        alert('📰 Стрічка новин оновлена!');
     }
 
     // --- ДИПЛОМАТИЧНІ ЗАПИТИ ТА СОЮЗИ ---
@@ -537,7 +882,6 @@
     async function acceptRequest(reqId, type, fromCountry, days) {
         await db.from('diplomacy_requests').update({ status: 'accepted' }).eq('id', reqId);
 
-        // Синхронізуємо актуальні дані про поточного гравця з БД
         let { data: freshMe } = await db.from('players').select('*').eq('id', currentPlayer.id).single();
         if(freshMe) currentPlayer = freshMe;
 
@@ -548,7 +892,6 @@
 
             await db.from('players').update({ allies: currentPlayer.allies, income: currentPlayer.income }).eq('id', currentPlayer.id);
 
-            // Оновлюємо союзника
             let { data: partnerArr } = await db.from('players').select('*').eq('country_name', fromCountry);
             if(partnerArr && partnerArr.length > 0) {
                 let partner = partnerArr[0];
@@ -570,7 +913,6 @@
 
             await db.from('players').update({ pacts: currentPlayer.pacts }).eq('id', currentPlayer.id);
 
-            // Додаємо пакт і партнеру
             let { data: partnerArr } = await db.from('players').select('*').eq('country_name', fromCountry);
             if(partnerArr && partnerArr.length > 0) {
                 let partner = partnerArr[0];
@@ -816,16 +1158,6 @@
         document.getElementById('chatInput').value = '';
     }
 
-    function renderProvinces() {
-        const grid = document.getElementById('provincesGrid');
-        grid.innerHTML = '';
-        const list = currentPlayer.provinces || [];
-        if(list.length === 0) { grid.innerHTML = '<p>Немає даних про провінції.</p>'; return; }
-        list.forEach(p => {
-            grid.innerHTML += `<div class="item-card"><h4>${p.name}</h4><p>👥 Населення: <b>${p.pop} млн</b></p><p>💵 Дохід: <b>+${p.income} млн $</b></p></div>`;
-        });
-    }
-
     async function loadDiplomacyTargets() {
         let { data: players } = await db.from('players').select('country_name, username');
         const select = document.getElementById('targetCountrySelect');
@@ -837,12 +1169,6 @@
                 }
             });
         }
-    }
-
-    async function createAlliance() {
-        const name = document.getElementById('allianceNameInput').value.trim();
-        if(!name) return alert('Введіть назву!');
-        alert(`Альянс "${name}" успішно створено!`);
     }
 
     function switchCategory(cat, btn) {
@@ -939,20 +1265,20 @@
         document.getElementById('tabDashboard').classList.add('hidden');
         document.getElementById('tabGovControl').classList.add('hidden');
         document.getElementById('tabTop10').classList.add('hidden');
-        document.getElementById('tabProvinces').classList.add('hidden');
         document.getElementById('tabBuild').classList.add('hidden');
         document.getElementById('tabArmy').classList.add('hidden');
+        document.getElementById('tabMarket').classList.add('hidden');
+        document.getElementById('tabEvents').classList.add('hidden');
         document.getElementById('tabDiplomacy').classList.add('hidden');
-        document.getElementById('tabAlliances').classList.add('hidden');
 
         if(tabName === 'dashboard') document.getElementById('tabDashboard').classList.remove('hidden');
         if(tabName === 'govControl') document.getElementById('tabGovControl').classList.remove('hidden');
         if(tabName === 'top10') { document.getElementById('tabTop10').classList.remove('hidden'); loadTop10(); }
-        if(tabName === 'provinces') document.getElementById('tabProvinces').classList.remove('hidden');
         if(tabName === 'build') { document.getElementById('tabBuild').classList.remove('hidden'); renderShop(); }
         if(tabName === 'army') { document.getElementById('tabArmy').classList.remove('hidden'); renderArmyShop(); }
+        if(tabName === 'market') { document.getElementById('tabMarket').classList.remove('hidden'); renderMarket(); }
+        if(tabName === 'events') { document.getElementById('tabEvents').classList.remove('hidden'); renderNews(); }
         if(tabName === 'diplomacy') { document.getElementById('tabDiplomacy').classList.remove('hidden'); loadDiplomacyTargets(); loadIncomingRequests(); }
-        if(tabName === 'alliances') document.getElementById('tabAlliances').classList.remove('hidden');
     }
 
     function logout() { location.reload(); }
