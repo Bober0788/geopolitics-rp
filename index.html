@@ -32,6 +32,7 @@
         .top-list { list-style: none; padding: 0; }
         .top-list li { background: #0f172a; margin-bottom: 8px; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; border: 1px solid #334155; }
         .request-card { background: #0f172a; border: 1px solid var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -70,7 +71,7 @@
             <div class="nav-btn" onclick="showTab('provinces', this)">🗺 Провінції</div>
             <div class="nav-btn" onclick="showTab('build', this)">🏛 Будівництво</div>
             <div class="nav-btn" onclick="showTab('army', this)">🪖 Армія</div>
-            <div class="nav-btn" onclick="showTab('diplomacy', this)">🤝 Дипломатія</div>
+            <div class="nav-btn" onclick="showTab('diplomacy', this)">🤝 Дипломатія <span id="reqBadge" class="badge hidden">0</span></div>
             <div class="nav-btn" onclick="showTab('alliances', this)">🛡 Союзи / ООН</div>
         </div>
 
@@ -180,10 +181,13 @@
         <div id="tabDiplomacy" class="card hidden">
             <h3>🤝 Міжнародна Дипломатія</h3>
 
-            <!-- РОЗДІЛ ВХІДНИХ ЗАПИТІВ -->
+            <!-- 1. КНОПКА ТА РОЗДІЛ ВХІДНИХ ЗАПИТІВ -->
             <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 20px;">
-                <h4 style="margin-top:0; color: var(--accent);">📩 Вхідні Дипломатичні Запити:</h4>
-                <div id="requestsList">Немає нових запитів</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="margin:0; color: var(--accent);">📩 Вхідні Запити:</h4>
+                    <button class="btn" style="width:auto; padding:6px 15px;" onclick="loadIncomingRequests()">🔄 Оновити Запити</button>
+                </div>
+                <div id="requestsList" style="margin-top: 15px;">Немає нових запитів</div>
             </div>
 
             <!-- ДІЮЧІ ДОГОВОРИ -->
@@ -389,6 +393,9 @@
         loadGameUI();
         initRealtimeChat();
         subscribeToRequests();
+        
+        // Автоматичний фоновий опит кожні 3 секунди
+        setInterval(loadIncomingRequests, 3000);
     }
 
     function loadGameUI() {
@@ -442,28 +449,42 @@
 
     // --- ДИПЛОМАТИЧНІ ЗАПИТИ ТА СОЮЗИ ---
 
-    async function subscribeToRequests() {
-        db.channel('public:diplomacy_requests').on('postgres_changes', { event: '*', schema: 'public', table: 'diplomacy_requests' }, () => {
-            loadIncomingRequests();
-        }).subscribe();
+    function subscribeToRequests() {
+        db.channel('diplomacy-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'diplomacy_requests' }, () => {
+                loadIncomingRequests();
+            })
+            .subscribe();
     }
 
     async function loadIncomingRequests() {
-        let { data: reqs } = await db.from('diplomacy_requests')
+        if(!currentPlayer) return;
+
+        let { data: reqs, error } = await db.from('diplomacy_requests')
             .select('*')
             .eq('to_country', currentPlayer.country_name)
             .eq('status', 'pending');
 
         const box = document.getElementById('requestsList');
+        const badge = document.getElementById('reqBadge');
         box.innerHTML = '';
 
-        if(!reqs || reqs.length === 0) {
-            box.innerHTML = '<i>Немає нових запитів</i>';
+        if(error) {
+            box.innerHTML = `<span style="color:var(--danger)">Помилка завантаження: ${error.message}</span>`;
             return;
         }
 
+        if(!reqs || reqs.length === 0) {
+            box.innerHTML = '<i>Активних запитів немає</i>';
+            badge.classList.add('hidden');
+            return;
+        }
+
+        badge.innerText = reqs.length;
+        badge.classList.remove('hidden');
+
         reqs.forEach(r => {
-            let details = r.type === 'alliance' ? 'Пропозиція військового Союзу (+15 млн $ доходу)' : `Пакт про ненапад на ${r.days} днів`;
+            let details = r.type === 'alliance' ? '🤝 Пропозиція військового Союзу (+15 млн $ доходу)' : `📜 Пакт про ненапад на ${r.days} днів`;
             box.innerHTML += `
                 <div class="request-card">
                     <div>
@@ -482,7 +503,7 @@
         if(!target) return alert('Оберіть країну!');
         if(target === currentPlayer.country_name) return alert('Не можна відправити запит самому собі!');
 
-        await db.from('diplomacy_requests').insert([{
+        const { error } = await db.from('diplomacy_requests').insert([{
             from_country: currentPlayer.country_name,
             from_username: currentPlayer.username,
             to_country: target,
@@ -490,7 +511,8 @@
             status: 'pending'
         }]);
 
-        alert(`Запит про Союз надіслано країні ${target}!`);
+        if(error) alert('Помилка надсилання: ' + error.message);
+        else alert(`🤝 Запит про Союз надіслано країні ${target}!`);
     }
 
     async function sendNonAggressionOffer() {
@@ -499,7 +521,7 @@
         if(!target) return alert('Оберіть країну!');
         if(target === currentPlayer.country_name) return alert('Не можна відправити запит самому собі!');
 
-        await db.from('diplomacy_requests').insert([{
+        const { error } = await db.from('diplomacy_requests').insert([{
             from_country: currentPlayer.country_name,
             from_username: currentPlayer.username,
             to_country: target,
@@ -508,14 +530,18 @@
             status: 'pending'
         }]);
 
-        alert(`Запит про Пакт про ненапад (${days} днів) надіслано країні ${target}!`);
+        if(error) alert('Помилка надсилання: ' + error.message);
+        else alert(`📜 Запит про Пакт про ненапад (${days} днів) надіслано країні ${target}!`);
     }
 
     async function acceptRequest(reqId, type, fromCountry, days) {
         await db.from('diplomacy_requests').update({ status: 'accepted' }).eq('id', reqId);
 
+        // Синхронізуємо актуальні дані про поточного гравця з БД
+        let { data: freshMe } = await db.from('players').select('*').eq('id', currentPlayer.id).single();
+        if(freshMe) currentPlayer = freshMe;
+
         if(type === 'alliance') {
-            // Оновлюємо поточного гравця
             if(!currentPlayer.allies) currentPlayer.allies = [];
             if(!currentPlayer.allies.includes(fromCountry)) currentPlayer.allies.push(fromCountry);
             currentPlayer.income = (currentPlayer.income || 40) + 15;
@@ -572,14 +598,14 @@
 
         if(currentPlayer.allies && currentPlayer.allies.length > 0) {
             currentPlayer.allies.forEach(ally => {
-                box.innerHTML += `<p>🤝 <b>Військовий Союз</b> укладено з <b>${ally}</b> (+15 млн $ доходу активні)</p>`;
+                box.innerHTML += `<p style="color:var(--success);">🤝 <b>Військовий Союз</b> укладено з <b>${ally}</b> (+15 млн $ доходу активні)</p>`;
                 hasItems = true;
             });
         }
 
         if(currentPlayer.pacts && currentPlayer.pacts.length > 0) {
             currentPlayer.pacts.forEach(p => {
-                box.innerHTML += `<p>📜 <b>Пакт про ненапад</b> прийнято з <b>${p.country}</b> до <b>${p.until}</b></p>`;
+                box.innerHTML += `<p style="color:var(--warning);">📜 <b>Пакт про ненапад</b> прийнято з <b>${p.country}</b> до <b>${p.until}</b></p>`;
                 hasItems = true;
             });
         }
@@ -594,7 +620,6 @@
         if(!target) return alert('Оберіть країну!');
         if(target === currentPlayer.country_name) return alert('Не можна оголосити війну самому собі!');
 
-        // Перевірка на наявність пакту про ненапад
         if(currentPlayer.pacts && currentPlayer.pacts.some(p => p.country === target)) {
             return alert(`❌ Ви не можете напасти на ${target}! Між вами діє Пакт про ненапад!`);
         }
@@ -605,21 +630,19 @@
         if(!enemyArr || enemyArr.length === 0) return alert('Країну не знайдено!');
         let enemy = enemyArr[0];
 
-        // Розрахунок результату війни
         let myPower = (currentPlayer.military_power || 0) + getRandomInt(10, 50);
         let enemyPower = (enemy.military_power || 0) + getRandomInt(10, 50);
 
         currentPlayer.happiness = Math.max(0, (currentPlayer.happiness || 100) - 20);
 
         if(myPower > enemyPower) {
-            let trophy = Math.round((enemy.budget || 0) * 0.2); // 20% контрибуція
+            let trophy = Math.round((enemy.budget || 0) * 0.2);
             currentPlayer.budget = (currentPlayer.budget || 0) + trophy;
             let enemyNewBudget = Math.max(0, (enemy.budget || 0) - trophy);
 
             await db.from('players').update({ budget: currentPlayer.budget, happiness: currentPlayer.happiness }).eq('id', currentPlayer.id);
             await db.from('players').update({ budget: enemyNewBudget }).eq('id', enemy.id);
 
-            // Повідомлення в глобальний чат
             await db.from('messages').insert([{ 
                 username: 'ГЕОПОЛІТИКА', 
                 country: '⚠️ ВІЙНА', 
@@ -767,7 +790,7 @@
     }
 
     function initRealtimeChat() {
-        db.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        db.channel('global-chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             appendChatMessage(payload.new.country, payload.new.username, payload.new.text);
         }).subscribe();
         loadChatHistory();
